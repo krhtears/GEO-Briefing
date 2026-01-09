@@ -77,7 +77,7 @@ if st.sidebar.button("수신인 추가하기"):
         st.sidebar.warning("이름과 이메일을 모두 입력해주세요.")
 
 # List and Delete recipients
-st.sidebar.subheader("Current Recipients")
+st.sidebar.subheader("메일 수신인 리스트")
 recipients = questions_manager.load_recipients()
 
 for i, r in enumerate(recipients):
