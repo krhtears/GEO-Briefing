@@ -37,7 +37,7 @@ RECIPIENTS_FILE = "recipients.json"
 
 def load_recipients():
     if not os.path.exists(RECIPIENTS_FILE):
-        return []
+        return [{"name": "김록훈", "email": "rhkim@megastudy.net"}]
     with open(RECIPIENTS_FILE, "r", encoding="utf-8") as f:
         try:
             data = json.load(f)

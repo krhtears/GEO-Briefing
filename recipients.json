@@ -1,4 +1,6 @@
 [
-    "ceorhkim@gmail.com",
-    "rhkim@megastudy.net"
+    {
+        "name": "김록훈",
+        "email": "rhkim@megastudy.net"
+    }
 ]
