@@ -1,0 +1,47 @@
+import json
+import os
+from datetime import datetime
+
+HISTORY_FILE = "history.json"
+MAX_HISTORY = 7
+
+def load_history():
+    """Loads the history list from the JSON file."""
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    
+    with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+def save_to_history(results_data):
+    """
+    Saves a new briefing result to history.
+    results_data: List of dictionaries or a single dictionary representing the briefing.
+    Example entry: {"timestamp": "...", "data": [...]}
+    """
+    history = load_history()
+    
+    new_entry = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data": results_data
+    }
+    
+    # Prepend new entry
+    history.insert(0, new_entry)
+    
+    # Keep only the last MAX_HISTORY items
+    if len(history) > MAX_HISTORY:
+        history = history[:MAX_HISTORY]
+        
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=4)
+
+def get_history_item(index):
+    """Returns a specific history item by index."""
+    history = load_history()
+    if 0 <= index < len(history):
+        return history[index]
+    return None

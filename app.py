@@ -3,14 +3,16 @@ import importlib
 import email_sender
 import questions_manager
 import api_clients
+import history_manager
 
 # Force reload modules to pick up changes
 importlib.reload(questions_manager)
 importlib.reload(api_clients)
 importlib.reload(email_sender)
+importlib.reload(history_manager)
 
 # Set page config
-st.set_page_config(page_title="유초중사업본부 Daily GEO Briefing", page_icon="🌤️", layout="wide")
+st.set_page_config(page_title="유초중사업본부 GEO Briefing", page_icon="🌤️", layout="wide")
 
 st.markdown(
     """
@@ -24,7 +26,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("유초중사업본부 Daily GEO Briefing")
+st.title("유초중사업본부 GEO Briefing")
 
 # Sidebar - Question Management
 st.sidebar.header("📝 질문 편집하기")
@@ -42,7 +44,7 @@ if st.sidebar.button("질문 추가하기"):
         st.sidebar.warning("질문을 입력해주세요.")
 
 # List and Delete questions
-st.sidebar.subheader("Current Questions")
+st.sidebar.subheader("등록된 질문")
 questions = questions_manager.load_questions()
 
 for i, q in enumerate(questions):
@@ -72,7 +74,7 @@ if st.sidebar.button("수신인 추가하기"):
         st.sidebar.warning("수신인을 입력해주세요.")
 
 # List and Delete recipients
-st.sidebar.subheader("Current Recipients")
+st.sidebar.subheader("등록된 수신인")
 recipients = questions_manager.load_recipients()
 
 for i, r in enumerate(recipients):
@@ -85,6 +87,21 @@ for i, r in enumerate(recipients):
 
 # Main Area
 st.subheader("Daily GEO Briefing")
+
+# --- History Section ---
+st.markdown("### 🕒 Recent Briefings")
+history_items = history_manager.load_history()
+
+# Create a container for history buttons to layout horizontally or wrapped
+if history_items:
+    cols = st.columns(len(history_items))
+    for i, item in enumerate(history_items):
+        # Button label: Timestamp
+        if cols[i].button(f"{item['timestamp']}\n(View)", key=f"hist_{i}"):
+             st.session_state.briefing_results = item['data']
+             st.session_state.show_confirm_dialog = False # Don't show confirm for history view
+             st.rerun()
+    st.divider()
 
 # Initialize session state for results if not exists
 if "briefing_results" not in st.session_state:
@@ -142,6 +159,10 @@ if run_clicked:
                 progress_bar.progress((index + 1) / len(questions))
             
             st.session_state.briefing_results = results_data
+            
+            # Save to history
+            history_manager.save_to_history(results_data)
+            
             st.session_state.show_confirm_dialog = True  # Trigger confirmation
             st.rerun() 
 
