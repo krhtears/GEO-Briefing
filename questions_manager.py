@@ -40,7 +40,15 @@ def load_recipients():
         return []
     with open(RECIPIENTS_FILE, "r", encoding="utf-8") as f:
         try:
-            return json.load(f)
+            data = json.load(f)
+            # Migration check: if list is strings, convert to dicts
+            cleaned_data = []
+            for item in data:
+                if isinstance(item, str):
+                    cleaned_data.append({"name": "No Name", "email": item})
+                elif isinstance(item, dict):
+                    cleaned_data.append(item)
+            return cleaned_data
         except json.JSONDecodeError:
             return []
 
@@ -48,13 +56,16 @@ def save_recipients(recipients):
     with open(RECIPIENTS_FILE, "w", encoding="utf-8") as f:
         json.dump(recipients, f, ensure_ascii=False, indent=4)
 
-def add_recipient(email):
+def add_recipient(name, email):
     recipients = load_recipients()
-    if email not in recipients:
-        recipients.append(email)
-        save_recipients(recipients)
-        return True
-    return False
+    # Check for duplicate email
+    for r in recipients:
+        if r['email'] == email:
+            return False
+            
+    recipients.append({"name": name, "email": email})
+    save_recipients(recipients)
+    return True
 
 def delete_recipient(index):
     recipients = load_recipients()

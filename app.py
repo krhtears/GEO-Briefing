@@ -60,26 +60,29 @@ st.sidebar.divider()
 st.sidebar.header("📧 수신인 편집하기")
 
 # Add new recipient
-new_recipient = st.sidebar.text_input("새로운 수신인을 입력해주세요.")
+col_new_name, col_new_email = st.sidebar.columns([0.4, 0.6])
+new_name = col_new_name.text_input("이름")
+new_email = col_new_email.text_input("이메일")
+
 if st.sidebar.button("수신인 추가하기"):
-    if new_recipient:
-        if "@" not in new_recipient:
+    if new_name and new_email:
+        if "@" not in new_email:
              st.sidebar.warning("이메일 형식이 올바르지 않습니다.")
-        elif questions_manager.add_recipient(new_recipient):
+        elif questions_manager.add_recipient(new_name, new_email):
             st.sidebar.success("수신인 추가 완료!")
             st.rerun()
         else:
             st.sidebar.warning("수신인이 이미 존재합니다.")
     else:
-        st.sidebar.warning("수신인을 입력해주세요.")
+        st.sidebar.warning("이름과 이메일을 모두 입력해주세요.")
 
 # List and Delete recipients
-st.sidebar.subheader("등록된 수신인")
+st.sidebar.subheader("Current Recipients")
 recipients = questions_manager.load_recipients()
 
 for i, r in enumerate(recipients):
     col1, col2 = st.sidebar.columns([0.85, 0.15])
-    col1.text(f"- {r}")
+    col1.text(f"- {r['name']} ({r['email']})")
     if col2.button("🗑️", key=f"del_r_{i}"):
         questions_manager.delete_recipient(i)
         st.rerun()

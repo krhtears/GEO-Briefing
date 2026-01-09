@@ -15,10 +15,19 @@ def send_briefing_email(recipients, results_data):
     sender_email = api_keys.EMAIL_SENDER
     sender_password = api_keys.EMAIL_PASSWORD.strip()
     
+    # Extract email addresses from recipient objects (dicts)
+    # Handle legacy (list of strings) just in case
+    target_emails = []
+    for r in recipients:
+        if isinstance(r, dict):
+             target_emails.append(r['email'])
+        else:
+             target_emails.append(str(r))
+    
     msg = MIMEMultipart()
     msg['From'] = sender_email
-    msg['Subject'] = f"🌤️ Daily AI Briefing - {datetime.now().strftime('%Y-%m-%d')}"
-    msg['To'] = ", ".join(recipients)
+    msg['Subject'] = f"유초중사업본부 GEO Briefing - {datetime.now().strftime('%Y-%m-%d')}"
+    msg['To'] = ", ".join(target_emails)
     
     # Build HTML Content
     html_content = """
@@ -72,7 +81,7 @@ def send_briefing_email(recipients, results_data):
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, recipients, msg.as_string())
+        server.sendmail(sender_email, target_emails, msg.as_string())
         server.quit()
         return True
     except Exception as e:
