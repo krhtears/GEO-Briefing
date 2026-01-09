@@ -32,10 +32,10 @@ st.title("유초중사업본부 GEO Briefing")
 
 # Sidebar Logic
 if st.session_state.get("viewing_history", False):
-    st.sidebar.header("📜 Past Briefing Questions")
-    st.sidebar.info("Currently viewing history. Editing is disabled.")
+    st.sidebar.header("📜 지난 브리핑 질문")
+    st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
     
-    if st.sidebar.button("🔙 Back to Live Mode"):
+    if st.sidebar.button("🔙 브리핑 입력 모드 돌아가기"):
         st.session_state.viewing_history = False
         st.rerun()
         
