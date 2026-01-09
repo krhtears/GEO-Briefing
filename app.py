@@ -14,7 +14,7 @@ importlib.reload(history_manager)
 importlib.reload(stats_manager)
 
 # Set page config
-st.set_page_config(page_title="유초중사업본부 GEO Briefing", page_icon="🌤️", layout="wide")
+st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="🌤️", layout="wide")
 
 st.markdown(
     """
