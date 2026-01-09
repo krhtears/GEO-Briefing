@@ -4,12 +4,14 @@ import email_sender
 import questions_manager
 import api_clients
 import history_manager
+import stats_manager
 
 # Force reload modules to pick up changes
 importlib.reload(questions_manager)
 importlib.reload(api_clients)
 importlib.reload(email_sender)
 importlib.reload(history_manager)
+importlib.reload(stats_manager)
 
 # Set page config
 st.set_page_config(page_title="유초중사업본부 GEO Briefing", page_icon="🌤️", layout="wide")
@@ -195,6 +197,30 @@ if st.session_state.briefing_results:
                      st.session_state.show_confirm_dialog = False
                      st.rerun()
 
+    # Calculate Stats
+    stats = stats_manager.calculate_stats(st.session_state.briefing_results)
+    
+    # Display Stats Table (custom HTML to match look)
+    st.markdown("### 📊 키워드 언급 횟수")
+    
+    # Create rows for HTML table
+    header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
+    count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{count}</td>" for count in stats.values()])
+    
+    st.markdown(f"""
+    <table style='width: 100%; border-collapse: collapse; border: 1px solid black;'>
+        <tr>
+            <th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center; width: 100px;'>구분</th>
+            {header_html}
+        </tr>
+        <tr>
+            <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>언급횟수</td>
+            {count_html}
+        </tr>
+    </table>
+    <br>
+    """, unsafe_allow_html=True)
+
     for item in st.session_state.briefing_results:
         st.markdown(f"### ❓ {item['question']}")
         col_gemini, col_gpt = st.columns(2)
@@ -222,9 +248,13 @@ if email_clicked or st.session_state.get("trigger_email_send", False):
         with st.spinner("Sending email..."):
             import importlib
             importlib.reload(email_sender)
-            email_status = email_sender.send_briefing_email(recipients, st.session_state.briefing_results)
+            
+            # Re-calculate stats for email to be safe (or pass from session state)
+            stats = stats_manager.calculate_stats(st.session_state.briefing_results)
+            
+            email_status = email_sender.send_briefing_email(recipients, st.session_state.briefing_results, stats)
             
             if email_status is True:
-                st.success(f"Email sent to {len(recipients)} recipients!")
+                st.success("이 메일이 발송되었습니다")
             else:
                 st.error(f"Failed to send email: {email_status}")
