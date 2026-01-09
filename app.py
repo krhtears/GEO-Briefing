@@ -32,16 +32,20 @@ st.title("유초중사업본부 GEO Briefing")
 st.sidebar.header("📝 질문 편집하기")
 
 # Add new question
-new_question = st.sidebar.text_input("새로운 질문을 입력해주세요.")
-if st.sidebar.button("질문 추가하기"):
-    if new_question:
-        if questions_manager.add_question(new_question):
-            st.sidebar.success("질문 추가 완료!")
-            st.rerun()
+# Add new question
+with st.sidebar.form(key="question_form", clear_on_submit=True):
+    new_question = st.text_input("새로운 질문을 입력해주세요.")
+    submit_question = st.form_submit_button("질문 추가하기")
+
+    if submit_question:
+        if new_question:
+            if questions_manager.add_question(new_question):
+                st.sidebar.success("질문 추가 완료!")
+                st.rerun()
+            else:
+                st.sidebar.warning("질문이 이미 존재합니다.")
         else:
-            st.sidebar.warning("질문이 이미 존재합니다.")
-    else:
-        st.sidebar.warning("질문을 입력해주세요.")
+            st.sidebar.warning("질문을 입력해주세요.")
 
 # List and Delete questions
 st.sidebar.subheader("등록된 질문")
@@ -60,21 +64,24 @@ st.sidebar.divider()
 st.sidebar.header("📧 수신인 편집하기")
 
 # Add new recipient
-col_new_name, col_new_email = st.sidebar.columns([0.4, 0.6])
-new_name = col_new_name.text_input("이름")
-new_email = col_new_email.text_input("이메일")
+# Add new recipient
+with st.sidebar.form(key="recipient_form", clear_on_submit=True):
+    col_new_name, col_new_email = st.columns([0.4, 0.6])
+    new_name = col_new_name.text_input("이름")
+    new_email = col_new_email.text_input("이메일")
+    submit_recipient = st.form_submit_button("수신인 추가하기")
 
-if st.sidebar.button("수신인 추가하기"):
-    if new_name and new_email:
-        if "@" not in new_email:
-             st.sidebar.warning("이메일 형식이 올바르지 않습니다.")
-        elif questions_manager.add_recipient(new_name, new_email):
-            st.sidebar.success("수신인 추가 완료!")
-            st.rerun()
+    if submit_recipient:
+        if new_name and new_email:
+            if "@" not in new_email:
+                 st.sidebar.warning("이메일 형식이 올바르지 않습니다.")
+            elif questions_manager.add_recipient(new_name, new_email):
+                st.sidebar.success("수신인 추가 완료!")
+                st.rerun()
+            else:
+                st.sidebar.warning("수신인이 이미 존재합니다.")
         else:
-            st.sidebar.warning("수신인이 이미 존재합니다.")
-    else:
-        st.sidebar.warning("이름과 이메일을 모두 입력해주세요.")
+            st.sidebar.warning("이름과 이메일을 모두 입력해주세요.")
 
 # List and Delete recipients
 st.sidebar.subheader("메일 수신인 리스트")
