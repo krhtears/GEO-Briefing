@@ -30,35 +30,60 @@ st.markdown(
 
 st.title("유초중사업본부 GEO Briefing")
 
-# Sidebar - Question Management
-st.sidebar.header("📝 질문 편집하기")
-
-# Add new question
-# Add new question
-with st.sidebar.form(key="question_form", clear_on_submit=True):
-    new_question = st.text_input("새로운 질문을 입력해주세요.")
-    submit_question = st.form_submit_button("질문 추가하기")
-
-    if submit_question:
-        if new_question:
-            if questions_manager.add_question(new_question):
-                st.sidebar.success("질문 추가 완료!")
-                st.rerun()
-            else:
-                st.sidebar.warning("질문이 이미 존재합니다.")
-        else:
-            st.sidebar.warning("질문을 입력해주세요.")
-
-# List and Delete questions
-st.sidebar.subheader("등록된 질문")
-questions = questions_manager.load_questions()
-
-for i, q in enumerate(questions):
-    col1, col2 = st.sidebar.columns([0.85, 0.15])
-    col1.write(f"**{i+1}.** {q}")
-    if col2.button("🗑️", key=f"del_q_{i}"):
-        questions_manager.delete_question(i)
+# Sidebar Logic
+if st.session_state.get("viewing_history", False):
+    st.sidebar.header("📜 Past Briefing Questions")
+    st.sidebar.info("Currently viewing history. Editing is disabled.")
+    
+    if st.sidebar.button("🔙 Back to Live Mode"):
+        st.session_state.viewing_history = False
         st.rerun()
+        
+    # Extract questions from the current result set
+    if "briefing_results" in st.session_state and st.session_state.briefing_results:
+        # Assuming current_questions matches the order in results
+        # Or safely extracting from the first result item if we stored it?
+        # Actually briefing_results is a list of dicts: [{'question': '...', ...}]
+        current_questions = [item['question'] for item in st.session_state.briefing_results]
+        
+        for i, q in enumerate(current_questions):
+             st.sidebar.write(f"**{i+1}.** {q}")
+        
+        # When viewing history, we use these questions for context, but we don't run them.
+        questions = current_questions
+    else:
+        st.sidebar.warning("No history loaded.")
+        questions = []
+
+else:
+    # Live Mode - Edit Questions
+    st.sidebar.header("📝 질문 편집하기")
+    
+    # Add new question
+    with st.sidebar.form(key="question_form", clear_on_submit=True):
+        new_question = st.text_input("새로운 질문을 입력해주세요.")
+        submit_question = st.form_submit_button("질문 추가하기")
+
+        if submit_question:
+            if new_question:
+                if questions_manager.add_question(new_question):
+                    st.sidebar.success("질문 추가 완료!")
+                    st.rerun()
+                else:
+                    st.sidebar.warning("질문이 이미 존재합니다.")
+            else:
+                st.sidebar.warning("질문을 입력해주세요.")
+
+    # List and Delete questions
+    st.sidebar.subheader("등록된 질문")
+    questions = questions_manager.load_questions()
+
+    for i, q in enumerate(questions):
+        col1, col2 = st.sidebar.columns([0.85, 0.15])
+        col1.write(f"**{i+1}.** {q}")
+        if col2.button("🗑️", key=f"del_q_{i}"):
+            questions_manager.delete_question(i)
+            st.rerun()
 
 st.sidebar.divider()
 
@@ -112,6 +137,7 @@ if history_items:
         if cols[i].button(f"{item['timestamp']}\n(View)", key=f"hist_{i}"):
              st.session_state.briefing_results = item['data']
              st.session_state.show_confirm_dialog = False # Don't show confirm for history view
+             st.session_state.viewing_history = True # Enable History View Mode
              st.rerun()
     st.divider()
 
@@ -123,6 +149,8 @@ col_btn_run, col_btn_email = st.columns([0.2, 0.8])
 
 with col_btn_run:
     run_clicked = st.button("🚀 Briefing 시작하기", type="primary")
+    if run_clicked:
+        st.session_state.viewing_history = False # Reset to Live Mode on Run
 
 with col_btn_email:
     email_clicked = st.button("📧 결과 이메일로 보내기")

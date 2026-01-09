@@ -73,10 +73,27 @@ def send_briefing_email(recipients, results_data, stats=None):
         {stats_html}
     """
     
+    import re
+    
+    def format_text(text):
+        # 1. Replace '**text**' with '<b>text</b>'
+        # Regular expression looks for **...** lazily
+        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+        
+        # 2. Remove single '*'
+        text = text.replace('*', '')
+        
+        # 3. Handle newlines
+        text = text.replace('\n', '<br>')
+        
+        return text
+    
     for item in results_data:
         q = item['question']
-        gemini = item['gemini'].replace('\n', '<br>')
-        gpt = item['gpt'].replace('\n', '<br>')
+        
+        # Apply formatting
+        gemini = format_text(item['gemini'])
+        gpt = format_text(item['gpt'])
         
         html_content += f"""
         <div class="container">
