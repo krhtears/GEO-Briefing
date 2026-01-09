@@ -28,7 +28,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("유초중사업본부 GEO Briefing")
+st.title("유초중사업본부 GEO Analytics")
 
 # Sidebar Logic
 if st.session_state.get("viewing_history", False):
