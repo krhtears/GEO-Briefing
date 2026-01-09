@@ -47,7 +47,7 @@ def ask_gpt(question):
 
     try:
         response = openai_client.chat.completions.create(
-            model="gpt-4", # Or gpt-3.5-turbo depending on preference/cost
+            model="gpt-4o", # Or gpt-3.5-turbo depending on preference/cost
             messages=[
                 {"role": "system", "content": "You are a helpful assistant providing daily briefings."},
                 {"role": "user", "content": question}
