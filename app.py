@@ -86,7 +86,7 @@ for i, r in enumerate(recipients):
 
 
 # Main Area
-st.subheader("Daily GEO Briefing")
+st.subheader("질문과 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
 
 # --- History Section ---
 st.markdown("### 🕒 Recent Briefings")
