@@ -9,6 +9,11 @@ importlib.reload(personas_manager)
 
 st.set_page_config(page_title="설정 (Configuration)", page_icon="⚙️")
 
+# Sidebar navigation
+with st.sidebar:
+    st.page_link("app.py", label="🏠 홈 (Main)", icon="🏠")
+    st.divider()
+
 st.title("⚙️ 설정 (Configuration)")
 st.info("이메일 수신인과 페르소나를 관리하는 페이지입니다.")
 
