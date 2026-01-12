@@ -7,10 +7,24 @@ importlib.reload(questions_manager)
 
 st.set_page_config(page_title="이메일 수신인 관리", page_icon="📧")
 
+# Hide native navigation
+st.markdown("""
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+</style>
+""", unsafe_allow_html=True)
+
 # Sidebar navigation
 with st.sidebar:
-    st.page_link("app.py", label="🏠 홈 (Main)", icon="🏠")
-    st.page_link("pages/02_Personas.py", label="🎭 사용자 페르소나 설정", icon="🎭")
+    if st.button("홈 (Main)", use_container_width=True):
+        st.switch_page("app.py")
+        
+    if st.button("이메일 수신인 설정", use_container_width=True, type="primary"):
+        st.switch_page("pages/01_Email_Recipients.py")
+        
+    if st.button("사용자 페르소나 설정", use_container_width=True):
+        st.switch_page("pages/02_Personas.py")
+        
     st.divider()
 
 st.title("📧 이메일 수신인 관리")
