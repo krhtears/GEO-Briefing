@@ -127,7 +127,7 @@ else:
 
 
 # Main Area
-st.subheader("질문과 질문자 페르소나, 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
+st.subheader("(1) 질문 (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
 
 # --- History Section ---
 st.markdown("### 🕒 Recent Briefings")
