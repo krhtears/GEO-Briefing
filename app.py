@@ -16,7 +16,7 @@ importlib.reload(stats_manager)
 importlib.reload(personas_manager)
 
 # Set page config
-st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="🌤️", layout="wide")
+st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="📊", layout="wide")
 
 st.markdown(
     """
@@ -244,7 +244,7 @@ if st.session_state.briefing_results:
     stats = stats_manager.calculate_stats(st.session_state.briefing_results)
     
     # Display Stats Table (custom HTML to match look)
-    st.markdown("### 📊 키워드 언급 횟수")
+    st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
     
     # Create rows for HTML table
     header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
