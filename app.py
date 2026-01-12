@@ -21,13 +21,22 @@ st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="
 st.markdown(
     """
     <style>
-    [data-testid="stSidebar"] {
-        min-width: 500px;
-        max-width: 800px;
+    /* Desktop Sidebar Width */
+    @media (min-width: 768px) {
+        [data-testid="stSidebar"] {
+            min-width: 500px;
+            max-width: 800px;
+        }
     }
     /* Hide the native Streamlit navigation widget */
     [data-testid="stSidebarNav"] {
         display: none;
+    }
+    # /* Responsive Tables */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
     </style>
     """,
