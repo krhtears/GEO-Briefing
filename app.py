@@ -22,8 +22,12 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 500px; /* Increase sidebar width */
+        min-width: 500px;
         max-width: 800px;
+    }
+    /* Hide the native Streamlit navigation widget */
+    [data-testid="stSidebarNav"] {
+        display: none;
     }
     </style>
     """,
@@ -34,7 +38,10 @@ st.title("유초중사업본부 GEO Analytics")
 
 # Sidebar Logic
 with st.sidebar:
-    # Links to Configuration Pages
+    # Custom Navigation
+    if st.button("홈 (Main)", use_container_width=True, type="primary"):
+        st.switch_page("app.py")
+        
     if st.button("이메일 수신인 설정", use_container_width=True):
         st.switch_page("pages/01_Email_Recipients.py")
         
