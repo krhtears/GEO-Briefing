@@ -103,12 +103,13 @@ else:
                 st.sidebar.warning("질문을 입력해주세요.")
 
     # List and Delete questions
-    st.sidebar.subheader("등록된 질문")
+    # List and Delete questions
+    st.sidebar.markdown("### <span style='color: #666666;'>등록된 질문</span>", unsafe_allow_html=True)
     questions = questions_manager.load_questions()
 
     for i, q in enumerate(questions):
         col1, col2 = st.sidebar.columns([0.85, 0.15])
-        col1.write(f"**{i+1}.** {q}")
+        col1.markdown(f"<span style='color: #666666;'>**{i+1}.** {q}</span>", unsafe_allow_html=True)
         if col2.button("🗑️", key=f"del_q_{i}"):
             questions_manager.delete_question(i)
             st.rerun()
@@ -136,10 +137,10 @@ else:
 
 
 # Main Area
-st.markdown("##### (1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
+st.markdown("##### (1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
 
 # --- History Section ---
-st.markdown("### 🕒 Recent Briefings")
+st.markdown("### Recent Briefings (최근 7개)")
 history_items = history_manager.load_history()
 
 # Create a container for history buttons to layout horizontally or wrapped
