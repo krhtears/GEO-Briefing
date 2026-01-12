@@ -85,7 +85,7 @@ if st.session_state.get("viewing_history", False):
 
 else:
     # Live Mode - Edit Questions
-    st.sidebar.header("📝 질문 편집하기")
+    st.sidebar.header("질문 편집하기")
     
     # Add new question
     with st.sidebar.form(key="question_form", clear_on_submit=True):
@@ -116,7 +116,7 @@ else:
 st.sidebar.divider()
 
 # --- Persona Status ---
-st.sidebar.header("🎭 적용된 페르소나")
+st.sidebar.header("질문자 페르소나")
 
 # Load active personas
 all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
@@ -136,7 +136,7 @@ else:
 
 
 # Main Area
-st.subheader("(1) 질문 (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
+st.markdown("##### (1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
 
 # --- History Section ---
 st.markdown("### 🕒 Recent Briefings")
@@ -161,12 +161,12 @@ if "briefing_results" not in st.session_state:
 col_btn_run, col_btn_email = st.columns([0.2, 0.8])
 
 with col_btn_run:
-    run_clicked = st.button("🚀 Briefing 시작하기", type="primary")
+    run_clicked = st.button("Briefing 시작하기", type="primary")
     if run_clicked:
         st.session_state.viewing_history = False # Reset to Live Mode on Run
 
 with col_btn_email:
-    email_clicked = st.button("📧 결과 이메일로 보내기")
+    email_clicked = st.button("결과 이메일로 보내기")
 
 if run_clicked:
     if not questions:
@@ -225,7 +225,7 @@ if st.session_state.briefing_results:
     # Confirmation Dialog Area
     if st.session_state.get("show_confirm_dialog", False):
         with st.container(border=True):
-            st.warning("📢 **해당 결과를 메일 수신인에게 지금 발송하시겠습니까?**")
+            st.warning("**해당 결과를 메일 수신인에게 지금 발송하시겠습니까?**")
             col_conf_yes, col_conf_no = st.columns(2)
             
             with col_conf_yes:
