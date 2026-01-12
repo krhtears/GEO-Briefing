@@ -74,7 +74,6 @@ if st.session_state.get("viewing_history", False):
     }
     
     /* 2. Target adjustments */
-    /* Fix: Ensure Primary Buttons have visible text (White or darker if background is light) */
     .stButton button[kind="primary"] {
         color: white !important; 
         font-weight: bold !important;
@@ -83,25 +82,29 @@ if st.session_state.get("viewing_history", False):
         color: white !important;
     }
 
-    /* Fix: Apply blinking ONLY to the button that comes after the info alert in sidebar */
-    [data-testid="stSidebar"] [data-testid="stAlert"] ~ .stElementContainer button {
+    /* Target the specific blinking container */
+    .blinking-container button {
         animation: pulse-red 2s infinite;
         border: 1px solid #FF8080 !important;
-        color: #FF8080 !important; /* Secondary button text color */
+        color: #FF8080 !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
-    if st.sidebar.button("🔙 브리핑 입력 모드 돌아가기"):
-        # Restore latest questions if available
-        history_items = history_manager.load_history()
-        if history_items:
-            latest_questions = [item['question'] for item in history_items[0]['data']]
-            questions_manager.set_questions(latest_questions)
-            
-        st.session_state.viewing_history = False
-        st.session_state.selected_hist_index = None # Reset selection
-        st.rerun()
+    # Wrap the button locally to target it specifically
+    with st.sidebar.container():
+        st.markdown('<div class="blinking-container">', unsafe_allow_html=True)
+        if st.button("🔙 브리핑 입력 모드 돌아가기"):
+            # Restore latest questions if available
+            history_items = history_manager.load_history()
+            if history_items:
+                latest_questions = [item['question'] for item in history_items[0]['data']]
+                questions_manager.set_questions(latest_questions)
+                
+            st.session_state.viewing_history = False
+            st.session_state.selected_hist_index = None # Reset selection
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
         
     # Extract questions from the current result set
     if "briefing_results" in st.session_state and st.session_state.briefing_results:
