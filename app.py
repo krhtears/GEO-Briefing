@@ -35,8 +35,12 @@ st.title("유초중사업본부 GEO Analytics")
 # Sidebar Logic
 with st.sidebar:
     # Links to Configuration Pages
-    st.page_link("pages/01_Email_Recipients.py", label="📧 이메일 수신인 설정", icon="📧")
-    st.page_link("pages/02_Personas.py", label="🎭 사용자 페르소나 설정", icon="🎭")
+    if st.button("이메일 수신인 설정", use_container_width=True):
+        st.switch_page("pages/01_Email_Recipients.py")
+        
+    if st.button("사용자 페르소나 설정", use_container_width=True):
+        st.switch_page("pages/02_Personas.py")
+        
     st.divider()
 
 if st.session_state.get("viewing_history", False):
