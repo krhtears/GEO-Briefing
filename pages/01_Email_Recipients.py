@@ -28,7 +28,7 @@ with st.sidebar:
     st.divider()
 
 st.title("📧 이메일 수신인 관리")
-st.markdown("#### 수신인 등록 완료 후 홈 (main)으로 돌아가주세요.")
+st.caption("수신인 등록 완료 후 '홈 (main)'으로 돌아가주세요.")
 
 # Add form
 with st.form("add_recipient_form", clear_on_submit=True):
