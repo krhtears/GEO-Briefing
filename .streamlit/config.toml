@@ -1,0 +1,4 @@
+[theme]
+# Primary accent color (Buttons, active state, etc.)
+# Default is #FF4B4B (Red). Changing to a softer/lighter red (Salmon/Light Coral).
+primaryColor = "#FF8080"
