@@ -1,0 +1,53 @@
+import streamlit as st
+import questions_manager
+import importlib
+
+# Force reload to ensure latest data
+importlib.reload(questions_manager)
+
+st.set_page_config(page_title="이메일 수신인 관리", page_icon="📧")
+
+# Sidebar navigation
+with st.sidebar:
+    st.page_link("app.py", label="🏠 홈 (Main)", icon="🏠")
+    st.page_link("pages/02_Personas.py", label="🎭 사용자 페르소나 설정", icon="🎭")
+    st.divider()
+
+st.title("📧 이메일 수신인 관리")
+
+# Add form
+with st.form("add_recipient_form", clear_on_submit=True):
+    col1, col2 = st.columns([0.4, 0.6])
+    new_name = col1.text_input("이름")
+    new_email = col2.text_input("이메일")
+    submitted = st.form_submit_button("수신인 추가")
+    
+    if submitted:
+        if new_name and new_email:
+            if questions_manager.add_recipient(new_name, new_email):
+                st.success(f"{new_name} ({new_email}) 추가 완료!")
+                st.rerun()
+            else:
+                st.error("이미 존재하는 이메일입니다.")
+        else:
+            st.warning("이름과 이메일을 모두 입력해주세요.")
+
+# List & Delete
+st.divider()
+recipients = questions_manager.load_recipients()
+if recipients:
+    st.write(f"총 {len(recipients)}명의 수신인이 등록되어 있습니다.")
+    for i, r in enumerate(recipients):
+        col_info, col_del = st.columns([0.85, 0.15])
+        with col_info:
+            if isinstance(r, dict):
+                st.text(f"{r['name']} ({r['email']})")
+            else:
+                st.text(f"{r}")
+        
+        with col_del:
+            if st.button("삭제", key=f"del_rec_{i}"):
+                questions_manager.delete_recipient(i)
+                st.rerun()
+else:
+    st.info("등록된 수신인이 없습니다.")
