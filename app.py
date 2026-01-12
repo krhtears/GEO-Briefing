@@ -34,7 +34,7 @@ st.title("유초중사업본부 GEO Analytics")
 
 # Sidebar Logic
 with st.sidebar:
-    st.page_link("app.py", label="🏠 홈 (Main)", icon="🏠")
+    # Link to Configuration Page
     st.page_link("pages/01_Configuration.py", label="⚙️ 설정 (수신인/페르소나)", icon="⚙️")
     st.divider()
 
