@@ -33,6 +33,11 @@ st.markdown(
 st.title("유초중사업본부 GEO Analytics")
 
 # Sidebar Logic
+with st.sidebar:
+    st.page_link("app.py", label="🏠 홈 (Main)", icon="🏠")
+    st.page_link("pages/01_Configuration.py", label="⚙️ 설정 (수신인/페르소나)", icon="⚙️")
+    st.divider()
+
 if st.session_state.get("viewing_history", False):
     st.sidebar.header("📜 지난 브리핑 질문")
     st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
