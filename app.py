@@ -45,7 +45,7 @@ with st.sidebar:
     if st.button("이메일 수신인 설정", use_container_width=True):
         st.switch_page("pages/01_Email_Recipients.py")
         
-    if st.button("사용자 페르소나 설정", use_container_width=True):
+    if st.button("질문자 페르소나 설정", use_container_width=True):
         st.switch_page("pages/02_Personas.py")
         
     st.divider()
@@ -114,7 +114,7 @@ all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
 active_personas_list = [p for p in all_personas if p.get('active', False)]
 
 if active_personas_list:
-    st.sidebar.success(f"총 {len(active_personas_list)}개의 페르소나가 적용됩니다.")
+    st.sidebar.success(f"총 {len(active_personas_list)}개의 질문자 페르소나가 적용됩니다.")
     for p in active_personas_list:
         st.sidebar.text(f"✅ {p['name']}")
     
@@ -122,12 +122,12 @@ if active_personas_list:
     selected_persona_prompts = [p['prompt'] for p in active_personas_list]
 
 else:
-    st.sidebar.info("적용된 페르소나가 없습니다.\n'사용자 페르소나 설정' 메뉴에서 선택해주세요.")
+    st.sidebar.info("적용된 페르소나가 없습니다.\n'질문자 페르소나 설정' 메뉴에서 선택해주세요.")
     selected_persona_prompts = []
 
 
 # Main Area
-st.subheader("질문과 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
+st.subheader("질문과 질문자 페르소나, 메일 수신인을 확인하고 briefing 시작하기를 눌러주세요.")
 
 # --- History Section ---
 st.markdown("### 🕒 Recent Briefings")
