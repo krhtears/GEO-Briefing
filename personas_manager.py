@@ -25,8 +25,8 @@ def add_persona(name, prompt):
     if len(personas) >= 5:
         return False
     
-    # Optional: Check duplicates?
-    personas.append({"name": name, "prompt": prompt})
+    # Initialize with 'active': False by default
+    personas.append({"name": name, "prompt": prompt, "active": False})
     save_personas(personas)
     return True
 
@@ -38,6 +38,22 @@ def delete_persona(index):
         save_personas(personas)
         return True
     return False
+
+def toggle_persona_active(index, is_active):
+    """Updates the active state of a persona."""
+    personas = load_personas()
+    if 0 <= index < len(personas):
+        personas[index]['active'] = is_active
+        save_personas(personas)
+        return True
+    return False
+
+def get_active_personas():
+    """Returns a list of active persona prompts."""
+    personas = load_personas()
+    # Check if 'active' key exists (migration handling), default to False if missing
+    return [p['prompt'] for p in personas if p.get('active', False)]
+
 
 def init_default_personas():
     """Initializes file with a default recipient if empty/missing (Optional helper)"""

@@ -106,26 +106,23 @@ else:
 
 st.sidebar.divider()
 
-# --- Persona Selection ---
-st.sidebar.header("🎭 사용자 페르소나 선택")
+# --- Persona Status ---
+st.sidebar.header("🎭 적용된 페르소나")
 
-# Load available personas from manager
-all_personas = personas_manager.load_personas() # [{'name':..., 'prompt':...}]
+# Load active personas
+all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
+active_personas_list = [p for p in all_personas if p.get('active', False)]
 
-if all_personas:
-    # Create a dictionary for mapping names to full objects
-    persona_map = {p['name']: p['prompt'] for p in all_personas}
+if active_personas_list:
+    st.sidebar.success(f"총 {len(active_personas_list)}개의 페르소나가 적용됩니다.")
+    for p in active_personas_list:
+        st.sidebar.text(f"✅ {p['name']}")
     
-    selected_persona_names = st.sidebar.multiselect(
-        "브리핑에 적용할 질문자 특성을 선택하세요 (최대 5개)",
-        options=list(persona_map.keys()),
-        help="선택한 사용자 특성을 고려하여 맞춤형 답변이 생성됩니다."
-    )
-    
-    # Get prompts for selected names
-    selected_persona_prompts = [persona_map[name] for name in selected_persona_names]
+    # Get prompts for API
+    selected_persona_prompts = [p['prompt'] for p in active_personas_list]
+
 else:
-    st.sidebar.info("등록된 페르소나가 없습니다.\n좌측 상단 '설정(Configuration)' 페이지에서 추가해주세요.")
+    st.sidebar.info("적용된 페르소나가 없습니다.\n'사용자 페르소나 설정' 메뉴에서 선택해주세요.")
     selected_persona_prompts = []
 
 
@@ -195,6 +192,7 @@ if run_clicked:
                 # OR: Render incrementally and append to state.
                 
                 with st.spinner(f"Analyzing Q{index+1}/{len(questions)}: {question}"):
+                    # Pass the active prompts loaded from sidebar logic above
                     gemini_response = api_clients.ask_gemini(question, persona_prompts=selected_persona_prompts)
                     gpt_response = api_clients.ask_gpt(question, persona_prompts=selected_persona_prompts)
                 
