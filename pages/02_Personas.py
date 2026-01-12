@@ -57,14 +57,30 @@ with st.expander("➕ 새 페르소나 추가하기", expanded=False):
 # List & Delete
 st.divider()
 if personas:
+    st.markdown("### 📋 등록된 페르소나 목록")
+    st.caption("체크박스를 선택하면 해당 페르소나가 브리핑 생성 시 반영됩니다.")
+    
     for i, p in enumerate(personas):
         with st.container(border=True):
             col_p_head, col_p_del = st.columns([0.85, 0.15])
             col_p_head.subheader(f"🎭 {p['name']}")
+            
             if col_p_del.button("삭제", key=f"del_persona_{i}"):
                 personas_manager.delete_persona(i)
                 st.rerun()
             
-            st.code(p['prompt'], language=None)
+            # Content without horizontal scroll (Wrapped)
+            st.info(p['prompt'], icon="📝")
+            
+            # Active Checkbox
+            is_active = p.get('active', False)
+            if st.checkbox("이 페르소나 적용하기", value=is_active, key=f"active_{i}"):
+                if not is_active:
+                    personas_manager.toggle_persona_active(i, True)
+                    st.rerun()
+            else:
+                if is_active:
+                    personas_manager.toggle_persona_active(i, False)
+                    st.rerun()
 else:
     st.info("등록된 페르소나가 없습니다.")
