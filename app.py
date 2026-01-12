@@ -5,6 +5,7 @@ import questions_manager
 import api_clients
 import history_manager
 import stats_manager
+import personas_manager
 
 # Force reload modules to pick up changes
 importlib.reload(questions_manager)
@@ -12,6 +13,7 @@ importlib.reload(api_clients)
 importlib.reload(email_sender)
 importlib.reload(history_manager)
 importlib.reload(stats_manager)
+importlib.reload(personas_manager)
 
 # Set page config
 st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="🌤️", layout="wide")
@@ -87,39 +89,27 @@ else:
 
 st.sidebar.divider()
 
-# Sidebar - Recipient Management
-st.sidebar.header("📧 수신인 편집하기")
+# --- Persona Selection ---
+st.sidebar.header("🎭 사용자 페르소나 선택")
 
-# Add new recipient
-# Add new recipient
-with st.sidebar.form(key="recipient_form", clear_on_submit=True):
-    col_new_name, col_new_email = st.columns([0.4, 0.6])
-    new_name = col_new_name.text_input("이름")
-    new_email = col_new_email.text_input("이메일")
-    submit_recipient = st.form_submit_button("수신인 추가하기")
+# Load available personas from manager
+all_personas = personas_manager.load_personas() # [{'name':..., 'prompt':...}]
 
-    if submit_recipient:
-        if new_name and new_email:
-            if "@" not in new_email:
-                 st.sidebar.warning("이메일 형식이 올바르지 않습니다.")
-            elif questions_manager.add_recipient(new_name, new_email):
-                st.sidebar.success("수신인 추가 완료!")
-                st.rerun()
-            else:
-                st.sidebar.warning("수신인이 이미 존재합니다.")
-        else:
-            st.sidebar.warning("이름과 이메일을 모두 입력해주세요.")
-
-# List and Delete recipients
-st.sidebar.subheader("메일 수신인 리스트")
-recipients = questions_manager.load_recipients()
-
-for i, r in enumerate(recipients):
-    col1, col2 = st.sidebar.columns([0.85, 0.15])
-    col1.text(f"- {r['name']} ({r['email']})")
-    if col2.button("🗑️", key=f"del_r_{i}"):
-        questions_manager.delete_recipient(i)
-        st.rerun()
+if all_personas:
+    # Create a dictionary for mapping names to full objects
+    persona_map = {p['name']: p['prompt'] for p in all_personas}
+    
+    selected_persona_names = st.sidebar.multiselect(
+        "브리핑에 적용할 질문자 특성을 선택하세요 (최대 5개)",
+        options=list(persona_map.keys()),
+        help="선택한 사용자 특성을 고려하여 맞춤형 답변이 생성됩니다."
+    )
+    
+    # Get prompts for selected names
+    selected_persona_prompts = [persona_map[name] for name in selected_persona_names]
+else:
+    st.sidebar.info("등록된 페르소나가 없습니다.\n좌측 상단 '설정(Configuration)' 페이지에서 추가해주세요.")
+    selected_persona_prompts = []
 
 
 # Main Area
@@ -188,8 +178,8 @@ if run_clicked:
                 # OR: Render incrementally and append to state.
                 
                 with st.spinner(f"Analyzing Q{index+1}/{len(questions)}: {question}"):
-                    gemini_response = api_clients.ask_gemini(question)
-                    gpt_response = api_clients.ask_gpt(question)
+                    gemini_response = api_clients.ask_gemini(question, persona_prompts=selected_persona_prompts)
+                    gpt_response = api_clients.ask_gpt(question, persona_prompts=selected_persona_prompts)
                 
                 results_data.append({
                     "question": question,
@@ -268,10 +258,13 @@ if email_clicked or st.session_state.get("trigger_email_send", False):
     # Reset trigger
     st.session_state.trigger_email_send = False
     
+    # Load recipients for email sending (User manages them in Configuration page now)
+    recipients = questions_manager.load_recipients()
+    
     if not st.session_state.briefing_results:
         st.warning("⚠️ Please generate the briefing first!")
     elif not recipients:
-        st.warning("⚠️ No recipients configured.")
+        st.warning("⚠️ No recipients configured. Please add them in the Setting page.")
     else:
         with st.spinner("Sending email..."):
             import importlib
