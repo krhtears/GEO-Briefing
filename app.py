@@ -56,6 +56,9 @@ with st.sidebar:
         
     if st.button("질문자 페르소나 설정", use_container_width=True):
         st.switch_page("pages/02_Personas.py")
+
+    if st.button("경쟁사 키워드 관리", use_container_width=True):
+        st.switch_page("pages/03_Competitor_Settings.py")
         
     st.divider()
 
@@ -348,3 +351,93 @@ if email_clicked or st.session_state.get("trigger_email_send", False):
                 st.success("이 메일이 발송되었습니다")
             else:
                 st.error(f"Failed to send email: {email_status}")
+
+# --- Visualization Section ---
+st.divider()
+st.subheader("📈 경쟁사 언급 추이 & 분석")
+
+if history_items:
+    # 1. Trend Chart Calculation
+    trend_data = []
+    
+    # Process history from oldest to newest for the chart
+    for item in reversed(history_items):
+        try:
+            # Re-calculate stats for this history item
+            # Note: This relies on competitors.json being current. 
+            # If historical data had brands that are now deleted, they won't be counted here.
+            # This is acceptable for "Current View" of trends.
+            stats = stats_manager.calculate_stats(item['data'])
+            
+            # Shorten date for display (MM-DD)
+            date_str = item['timestamp'][5:10] 
+            stats['Date'] = date_str
+            trend_data.append(stats)
+        except Exception:
+            continue
+            
+    if trend_data:
+        import pandas as pd
+        df_trend = pd.DataFrame(trend_data)
+        if 'Date' in df_trend.columns:
+            df_trend = df_trend.set_index('Date')
+            st.markdown("###### 📅 최근 7회 브리핑 브랜드 언급량 추이")
+            st.line_chart(df_trend)
+
+    # 2. Word Cloud
+    st.markdown("###### ☁️ 경쟁사 연관 키워드 워드클라우드")
+    
+    # Target Data: Use current results if available, else latest history
+    target_results = st.session_state.briefing_results if st.session_state.briefing_results else (history_items[0]['data'] if history_items else [])
+    
+    if target_results:
+        import matplotlib.pyplot as plt
+        from wordcloud import WordCloud
+        import platform
+        
+        # Load competitors for filtering
+        competitors = stats_manager.load_competitors()
+        relevant_text_chunks = []
+        
+        for res in target_results:
+            # Combine Q, Gemini, GPT text
+            full_text = f"{res['question']} {res['gemini']} {res['gpt']}"
+            
+            # Simple sentence splitting by newlines and periods
+            sentences = full_text.replace('\n', '.').split('.')
+            
+            for sent in sentences:
+                for comp in competitors:
+                    # Check if any keyword of this competitor is in the sentence
+                    if any(kw in sent for kw in comp['keywords']):
+                        relevant_text_chunks.append(sent)
+                        break 
+        
+        full_text_for_wc = " ".join(relevant_text_chunks)
+        
+        if full_text_for_wc.strip():
+            # Font handling for Korean
+            font_path = "malgun.ttf" if platform.system() == 'Windows' else "AppleGothic"
+            # Try absolute path for Windows if simple name fails, usually c:/Windows/Fonts/malgun.ttf
+            if platform.system() == 'Windows':
+                font_path = "c:/Windows/Fonts/malgun.ttf"
+            
+            try:
+                wc = WordCloud(
+                    font_path=font_path,
+                    width=800, 
+                    height=400, 
+                    background_color="white",
+                    regexp=r"[가-힣a-zA-Z0-9]+" # Extract Korean/English/Numbers
+                ).generate(full_text_for_wc)
+                
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.imshow(wc, interpolation='bilinear')
+                ax.axis("off")
+                st.pyplot(fig)
+            except Exception as e:
+                st.error(f"워드클라우드 생성 실패 (폰트 문제일 수 있습니다): {e}")
+        else:
+            st.info("📉 이번 브리핑에서 경쟁사 관련 언급이 충분하지 않아 워드클라우드를 생성할 수 없습니다.")
+    else:
+        st.info("데이터가 없습니다.")
