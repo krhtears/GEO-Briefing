@@ -64,6 +64,12 @@ if st.session_state.get("viewing_history", False):
     st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
     
     if st.sidebar.button("🔙 브리핑 입력 모드 돌아가기"):
+        # Restore latest questions if available
+        history_items = history_manager.load_history()
+        if history_items:
+            latest_questions = [item['question'] for item in history_items[0]['data']]
+            questions_manager.set_questions(latest_questions)
+            
         st.session_state.viewing_history = False
         st.rerun()
         

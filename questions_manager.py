@@ -32,6 +32,14 @@ def delete_question(index):
         return True
     return False
 
+def set_questions(new_questions_list):
+    """
+    Overwrites the current list of questions with a new list.
+    Useful for restoring history.
+    """
+    save_questions(new_questions_list)
+    return True
+
 # Recipient Management
 RECIPIENTS_FILE = "recipients.json"
 
