@@ -22,8 +22,11 @@ with st.sidebar:
     if st.button("이메일 수신인 설정", use_container_width=True):
         st.switch_page("pages/01_Email_Recipients.py")
         
-    if st.button("사용자 페르소나 설정", use_container_width=True, type="primary"):
+    if st.button("질문자 페르소나 설정", use_container_width=True, type="primary"):
         st.switch_page("pages/02_Personas.py")
+
+    if st.button("경쟁사 키워드 관리", use_container_width=True):
+        st.switch_page("pages/03_Competitor_Settings.py")
         
     st.divider()
 
