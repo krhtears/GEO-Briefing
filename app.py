@@ -63,6 +63,22 @@ if st.session_state.get("viewing_history", False):
     st.sidebar.header("📜 지난 브리핑 질문")
     st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
     
+    # CSS to make the "Back" button blink/pulse (It's the last button in sidebar in this mode)
+    st.markdown("""
+    <style>
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 128, 128, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 128, 128, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 128, 128, 0); }
+    }
+    [data-testid="stSidebar"] button:last-of-type {
+        animation: pulse-red 2s infinite;
+        border: 1px solid #FF8080 !important;
+        color: #FF8080 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     if st.sidebar.button("🔙 브리핑 입력 모드 돌아가기"):
         # Restore latest questions if available
         history_items = history_manager.load_history()
