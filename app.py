@@ -71,6 +71,7 @@ if st.session_state.get("viewing_history", False):
             questions_manager.set_questions(latest_questions)
             
         st.session_state.viewing_history = False
+        st.session_state.selected_hist_index = None # Reset selection
         st.rerun()
         
     # Extract questions from the current result set
@@ -153,11 +154,15 @@ history_items = history_manager.load_history()
 if history_items:
     cols = st.columns(len(history_items))
     for i, item in enumerate(history_items):
+        # Determine button style
+        btn_type = "primary" if st.session_state.get("selected_hist_index") == i else "secondary"
+        
         # Button label: Timestamp
-        if cols[i].button(f"{item['timestamp']}\n(View)", key=f"hist_{i}"):
+        if cols[i].button(f"{item['timestamp']}\n(View)", key=f"hist_{i}", type=btn_type):
              st.session_state.briefing_results = item['data']
              st.session_state.show_confirm_dialog = False # Don't show confirm for history view
              st.session_state.viewing_history = True # Enable History View Mode
+             st.session_state.selected_hist_index = i # Track selection
              st.rerun()
     st.divider()
 
@@ -171,6 +176,7 @@ with col_btn_run:
     run_clicked = st.button("Briefing 시작하기", type="primary")
     if run_clicked:
         st.session_state.viewing_history = False # Reset to Live Mode on Run
+        st.session_state.selected_hist_index = None # Reset selection
 
 with col_btn_email:
     email_clicked = st.button("결과 이메일로 보내기")
