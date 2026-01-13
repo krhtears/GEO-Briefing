@@ -16,12 +16,13 @@ def load_history():
         except json.JSONDecodeError:
             return []
 
-def save_to_history(results_data, active_personas=None):
+def save_to_history(results_data, active_personas=None, competitors_config=None):
     """
     Saves a new briefing result to history.
     results_data: List of dictionaries or a single dictionary representing the briefing.
     active_personas: List of persona names or dicts used in this briefing.
-    Example entry: {"timestamp": "...", "data": [...], "personas": [...]}
+    competitors_config: List of dicts representing the competitor settings used.
+    Example entry: {"timestamp": "...", "data": [...], "personas": [...], "competitors": [...]}
     """
     history = load_history()
     
@@ -38,7 +39,8 @@ def save_to_history(results_data, active_personas=None):
     new_entry = {
         "timestamp": now_kst.strftime("%Y-%m-%d %H:%M:%S"),
         "data": results_data,
-        "personas": active_personas or []
+        "personas": active_personas or [],
+        "competitors": competitors_config or []
     }
     
     # Prepend new entry

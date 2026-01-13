@@ -285,8 +285,11 @@ if run_clicked:
             current_personas = personas_manager.load_personas()
             active_personas_to_save = [p for p in current_personas if p.get('active', False)]
             
+            # Load current competitors for saving (Snapshot)
+            current_competitors = stats_manager.load_competitors()
+            
             # Save to history
-            history_manager.save_to_history(results_data, active_personas_to_save)
+            history_manager.save_to_history(results_data, active_personas_to_save, competitors_config=current_competitors)
             
             # Switch to history view for the newly created item
             st.session_state.viewing_history = True
@@ -315,11 +318,19 @@ if st.session_state.briefing_results:
                      st.rerun()
 
     # Calculate Stats
-    stats = stats_manager.calculate_stats(st.session_state.briefing_results)
+    all_history = history_manager.load_history()
+    
+    # Determine which competitors config to use for Current Stats
+    current_competitors_config = None
+    if st.session_state.get("viewing_history", False):
+        hist_idx = st.session_state.get("selected_hist_index", 0)
+        if hist_idx is not None and 0 <= hist_idx < len(all_history):
+            current_competitors_config = all_history[hist_idx].get("competitors")
+            
+    stats = stats_manager.calculate_stats(st.session_state.briefing_results, competitors=current_competitors_config)
     
     # Calculate Previous Stats (Comparison)
     previous_stats = None
-    all_history = history_manager.load_history()
     
     if all_history:
         current_idx = 0
@@ -333,7 +344,10 @@ if st.session_state.briefing_results:
         # Previous is current_idx + 1
         prev_idx = current_idx + 1
         if prev_idx < len(all_history):
-            previous_stats = stats_manager.calculate_stats(all_history[prev_idx]['data'])
+            prev_item = all_history[prev_idx]
+            # Use the competitors config that was saved with that history item
+            prev_config = prev_item.get("competitors")
+            previous_stats = stats_manager.calculate_stats(prev_item['data'], competitors=prev_config)
 
     # Display Stats Table (custom HTML to match look)
     st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
