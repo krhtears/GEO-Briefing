@@ -104,6 +104,13 @@ with st.sidebar:
     if run_clicked:
         st.session_state.viewing_history = False # Reset to Live Mode on Run
         st.session_state.selected_hist_index = None # Reset selection
+
+    # Check for auto-run trigger from other pages
+    if st.session_state.get("auto_run_briefing", False):
+        run_clicked = True
+        st.session_state.auto_run_briefing = False # Consume flag
+        st.session_state.viewing_history = False
+        st.session_state.selected_hist_index = None
         
     st.divider()
 
