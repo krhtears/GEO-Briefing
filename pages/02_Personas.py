@@ -66,25 +66,60 @@ if personas:
     
     for i, p in enumerate(personas):
         with st.container(border=True):
-            col_p_head, col_p_del = st.columns([0.85, 0.15])
-            col_p_head.subheader(f"🎭 {p['name']}")
+            # Check if this item is being edited
+            is_editing = (st.session_state.get("edit_persona_index") == i)
             
-            if col_p_del.button("삭제", key=f"del_persona_{i}"):
-                personas_manager.delete_persona(i)
-                st.rerun()
-            
-            # Content without horizontal scroll (Wrapped)
-            st.info(p['prompt'], icon="📝")
-            
-            # Active Checkbox
-            is_active = p.get('active', False)
-            if st.checkbox("이 페르소나 적용하기", value=is_active, key=f"active_{i}"):
-                if not is_active:
-                    personas_manager.toggle_persona_active(i, True)
-                    st.rerun()
+            if is_editing:
+                # --- Edit Mode ---
+                with st.form(key=f"edit_persona_form_{i}"):
+                    edited_name = st.text_input("페르소나 이름", value=p['name'])
+                    edited_prompt = st.text_area("특성 설명", value=p['prompt'], height=150)
+                    
+                    col_save, col_cancel = st.columns(2)
+                    if col_save.form_submit_button("저장 (Save)", type="primary", use_container_width=True):
+                        # Update data
+                        personas[i]['name'] = edited_name
+                        personas[i]['prompt'] = edited_prompt
+                        personas_manager.save_personas(personas)
+                        
+                        # Reset state
+                        st.session_state.edit_persona_index = None
+                        st.success("수정되었습니다.")
+                        st.rerun()
+                        
+                    if col_cancel.form_submit_button("취소 (Cancel)", type="secondary", use_container_width=True):
+                        st.session_state.edit_persona_index = None
+                        st.rerun()
             else:
-                if is_active:
-                    personas_manager.toggle_persona_active(i, False)
-                    st.rerun()
+                # --- View Mode ---
+                col_p_head, col_p_action = st.columns([0.8, 0.2])
+                with col_p_head:
+                    st.subheader(f"🎭 {p['name']}")
+                
+                with col_p_action:
+                     if st.button("수정 (Edit)", key=f"edit_p_{i}", use_container_width=True):
+                        st.session_state.edit_persona_index = i
+                        st.rerun()
+                     
+                     if st.button("삭제 (Delete)", key=f"del_persona_{i}", type="secondary", use_container_width=True):
+                        personas_manager.delete_persona(i)
+                        # Handle edge case where deleted item was being edited
+                        if st.session_state.get("edit_persona_index") == i:
+                             st.session_state.edit_persona_index = None
+                        st.rerun()
+                
+                # Content without horizontal scroll (Wrapped)
+                st.info(p['prompt'], icon="📝")
+                
+                # Active Checkbox
+                is_active = p.get('active', False)
+                if st.checkbox("이 페르소나 적용하기", value=is_active, key=f"active_{i}"):
+                    if not is_active:
+                        personas_manager.toggle_persona_active(i, True)
+                        st.rerun()
+                else:
+                    if is_active:
+                        personas_manager.toggle_persona_active(i, False)
+                        st.rerun()
 else:
     st.info("등록된 페르소나가 없습니다.")
