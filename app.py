@@ -407,8 +407,11 @@ if email_clicked or st.session_state.get("trigger_email_send", False):
             email_status = email_sender.send_briefing_email(recipients, st.session_state.briefing_results, stats)
             
             if email_status is True:
-                st.success("이 메일이 발송되었습니다")
+                st.toast("✅ 이메일이 성공적으로 발송되었습니다!", icon="📧")
+                st.balloons()
+                st.success("이메일이 발송되었습니다")
             else:
+                st.toast(f"❌ 이메일 발송 실패: {email_status}", icon="⚠️")
                 st.error(f"Failed to send email: {email_status}")
 
 # --- Visualization Section ---
