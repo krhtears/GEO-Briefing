@@ -53,6 +53,20 @@ st.caption("설정 완료 후 '홈 (main)'으로 돌아가주세요.")
 # Load Questions
 questions = questions_manager.load_questions()
 
+# Action Bar
+col_reset, col_space = st.columns([0.4, 0.6])
+with col_reset:
+    import history_manager 
+    if st.button("🔄 최근 브리핑 질문으로 초기화 (Restore Last)", help="가장 최근 브리핑에 사용된 질문 리스트를 불러옵니다."):
+        latest_history = history_manager.load_history()
+        if latest_history:
+            latest_questions = [item['question'] for item in latest_history[0]['data']]
+            questions_manager.set_questions(latest_questions)
+            st.success("최근 브리핑 질문을 불러왔습니다.")
+            st.rerun()
+        else:
+            st.warning("브리핑 기록이 없습니다.")
+
 # Add New Question Form
 with st.expander("➕ 새로운 질문 추가하기", expanded=False):
     with st.form("add_question_form", clear_on_submit=True):
