@@ -63,28 +63,49 @@ if not competitors:
 else:
     for i, comp in enumerate(competitors):
         with st.container(border=True):
-            col1, col2 = st.columns([0.85, 0.15])
+            # Check if this item is being edited
+            is_editing = (st.session_state.get("edit_target_index") == i)
             
-            with col1:
-                st.subheader(f"🏷️ {comp['name']}")
-                
-                # Keywords display/edit
-                current_keywords_str = ", ".join(comp['keywords'])
-                new_keywords_str = st.text_area(f"키워드 (쉼표 구분) - {comp['name']}", value=current_keywords_str, key=f"kw_{i}")
-                
-                if new_keywords_str != current_keywords_str:
-                    if st.button("키워드 수정 저장", key=f"save_{i}"):
-                        updated_keywords = [k.strip() for k in new_keywords_str.split(",") if k.strip()]
-                        competitors[i]['keywords'] = updated_keywords
+            if is_editing:
+                # --- Edit Mode ---
+                with st.form(key=f"edit_form_{i}"):
+                    edited_name = st.text_input("브랜드명", value=comp['name'])
+                    edited_keywords = st.text_area("키워드 (쉼표로 구분)", value=", ".join(comp['keywords']))
+                    
+                    col_save, col_cancel = st.columns(2)
+                    if col_save.form_submit_button("저장 (Save)", type="primary", use_container_width=True):
+                        # Update data
+                        competitors[i]['name'] = edited_name
+                        competitors[i]['keywords'] = [k.strip() for k in edited_keywords.split(",") if k.strip()]
                         stats_manager.save_competitors(competitors)
-                        st.success("키워드가 수정되었습니다.")
+                        
+                        # Reset state
+                        st.session_state.edit_target_index = None
+                        st.success("수정되었습니다.")
+                        st.rerun()
+                        
+                    if col_cancel.form_submit_button("취소 (Cancel)", type="secondary", use_container_width=True):
+                        st.session_state.edit_target_index = None
                         st.rerun()
             
-            with col2:
-                st.write("") # Spacer
-                st.write("") 
-                if st.button("삭제", key=f"del_{i}", type="secondary"):
-                    competitors.pop(i)
-                    stats_manager.save_competitors(competitors)
-                    st.success("삭제되었습니다.")
-                    st.rerun()
+            else:
+                # --- View Mode ---
+                col1, col2 = st.columns([0.8, 0.2])
+                
+                with col1:
+                    st.subheader(f"🏷️ {comp['name']}")
+                    st.write(f"**키워드:** {', '.join(comp['keywords'])}")
+                
+                with col2:
+                    if st.button("수정 (Edit)", key=f"edit_btn_{i}", use_container_width=True):
+                        st.session_state.edit_target_index = i
+                        st.rerun()
+                        
+                    if st.button("삭제 (Delete)", key=f"del_btn_{i}", type="secondary", use_container_width=True):
+                        competitors.pop(i)
+                        stats_manager.save_competitors(competitors)
+                        # Identify logic if we deleted the one being edited (edge case), reset state
+                        if st.session_state.get("edit_target_index") == i:
+                            st.session_state.edit_target_index = None
+                        st.success("삭제되었습니다.")
+                        st.rerun()
