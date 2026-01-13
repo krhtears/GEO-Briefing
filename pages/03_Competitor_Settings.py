@@ -17,6 +17,9 @@ with st.sidebar:
         st.switch_page("pages/02_Personas.py")
     if st.button("경쟁사 키워드 관리", use_container_width=True, type="primary"):
         pass # Already on this page
+
+    if st.button("질문 설정 (Questions)", use_container_width=True):
+        st.switch_page("pages/04_Question_Settings.py")
     
     st.divider()
 
