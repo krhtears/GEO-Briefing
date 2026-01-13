@@ -30,6 +30,10 @@ if "briefing_results" not in st.session_state:
             st.session_state.briefing_results = latest_history[0]['data']
             st.session_state.viewing_history = True
             st.session_state.selected_hist_index = 0
+            
+            # Sync active questions to latest history
+            latest_questions = [item['question'] for item in latest_history[0]['data']]
+            questions_manager.set_questions(latest_questions)
 
 st.markdown(
     """
