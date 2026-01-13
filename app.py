@@ -201,7 +201,7 @@ else:
 
 
 # Main Area
-st.caption("(1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
+st.caption("새로 브리핑을 하려면 질문, 질문자 페르소나, 경쟁사 키워드, 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
 
 # --- History Section ---
 st.markdown("##### Recent Briefings (최근 14개)")
