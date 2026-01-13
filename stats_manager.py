@@ -1,7 +1,7 @@
 import json
 import os
 
-COMPETITORS_FILE = "competitors.json"
+COMPETITORS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "competitors.json")
 
 def load_competitors():
     """Loads the competitor list from the JSON file."""

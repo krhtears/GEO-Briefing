@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime
 
-HISTORY_FILE = "history.json"
 MAX_HISTORY = 14
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json")
 
 def load_history():
     """Loads the history list from the JSON file."""
