@@ -16,17 +16,19 @@ def load_history():
         except json.JSONDecodeError:
             return []
 
-def save_to_history(results_data):
+def save_to_history(results_data, active_personas=None):
     """
     Saves a new briefing result to history.
     results_data: List of dictionaries or a single dictionary representing the briefing.
-    Example entry: {"timestamp": "...", "data": [...]}
+    active_personas: List of persona names or dicts used in this briefing.
+    Example entry: {"timestamp": "...", "data": [...], "personas": [...]}
     """
     history = load_history()
     
     new_entry = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "data": results_data
+        "data": results_data,
+        "personas": active_personas or []
     }
     
     # Prepend new entry

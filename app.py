@@ -64,7 +64,7 @@ with st.sidebar:
     if st.button("이메일 수신인 설정", use_container_width=True):
         st.switch_page("pages/01_Email_Recipients.py")
 
-    if st.button("경쟁사 키워드 관리", use_container_width=True):
+    if st.button("경쟁사 키워드 설정", use_container_width=True):
         st.switch_page("pages/03_Competitor_Settings.py")
         
     st.divider()
@@ -142,6 +142,31 @@ if st.session_state.get("viewing_history", False):
         
         # When viewing history, we use these questions for context, but we don't run them.
         questions = current_questions
+        
+        st.sidebar.divider()
+
+        # 2. Historical Persona Status
+        st.sidebar.header("🎭 질문자 페르소나 (당시 설정)")
+        
+        # Try to find the history item matching the current results to get personas
+        # Since we don't strictly link briefing_results to a history ID in session state, 
+        # we might need to rely on the selected_hist_index if it exists
+        historical_personas = []
+        if st.session_state.get("selected_hist_index") is not None:
+             # Load from history file again to be sure (or we could cache it)
+             loaded_hist = history_manager.get_history_item(st.session_state.selected_hist_index)
+             if loaded_hist and 'personas' in loaded_hist:
+                 historical_personas = loaded_hist['personas']
+        
+        if historical_personas:
+            st.sidebar.success(f"당시 {len(historical_personas)}개의 페르소나가 적용됨")
+            for p in historical_personas:
+                # Handle if p is dict or string (legacy compat)
+                p_name = p['name'] if isinstance(p, dict) else str(p)
+                st.sidebar.text(f"✅ {p_name}")
+        else:
+             st.sidebar.info("기록된 페르소나 정보가 없습니다.")
+
     else:
         st.sidebar.warning("No history loaded.")
         questions = []
@@ -272,8 +297,12 @@ if run_clicked:
             
             st.session_state.briefing_results = results_data
             
+            # Load active personas for saving
+            current_personas = personas_manager.load_personas()
+            active_personas_to_save = [p for p in current_personas if p.get('active', False)]
+            
             # Save to history
-            history_manager.save_to_history(results_data)
+            history_manager.save_to_history(results_data, active_personas_to_save)
             
             st.session_state.show_confirm_dialog = True  # Trigger confirmation
             st.rerun() 
