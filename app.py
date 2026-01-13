@@ -317,16 +317,42 @@ if st.session_state.briefing_results:
     # Calculate Stats
     stats = stats_manager.calculate_stats(st.session_state.briefing_results)
     
+    # Calculate Previous Stats (Comparison)
+    previous_stats = None
+    all_history = history_manager.load_history()
+    
+    if all_history:
+        current_idx = 0
+        is_live = not st.session_state.get("viewing_history", False)
+        
+        if not is_live:
+             # If viewing history, current_idx is selected_hist_index
+             current_idx = st.session_state.get("selected_hist_index", 0)
+             if current_idx is None: current_idx = 0
+        
+        # Previous is current_idx + 1
+        prev_idx = current_idx + 1
+        if prev_idx < len(all_history):
+            previous_stats = stats_manager.calculate_stats(all_history[prev_idx]['data'])
+
     # Display Stats Table (custom HTML to match look)
     st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
     
     # Create rows for HTML table
-    # Create rows for HTML table
     header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
     
-    # Total Counts
+    # Total Counts (Current)
     count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{data['count']}</td>" for data in stats.values()])
     
+    # Previous Counts (Comparison)
+    prev_count_html = ""
+    if previous_stats:
+        for brand in stats.keys():
+            prev_val = previous_stats.get(brand, {}).get('count', 0)
+            prev_count_html += f"<td style='border: 1px solid black; padding: 5px; text-align: center; color: #888;'>({prev_val})</td>"
+    else:
+        prev_count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center; color: #888;'>-</td>" for _ in stats.keys()])
+
     # Detail Breakdown
     detail_html = ""
     for data in stats.values():
@@ -348,6 +374,10 @@ if st.session_state.briefing_results:
         <tr>
             <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>언급횟수</td>
             {count_html}
+        </tr>
+        <tr>
+            <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold; color: #666;'>이전회차</td>
+            {prev_count_html}
         </tr>
         <tr>
             <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>키워드 상세</td>
@@ -477,12 +507,13 @@ if history_items:
                 x=alt.X('Date', title='날짜'),
                 y=alt.Y('Mentions', title='언급 횟수'),
                 color=alt.Color('Brand', title='브랜드'),
-                strokeDash=alt.StrokeDash('Brand', scale=alt.Scale(domain=list(brands), range=dash_styles), title='브랜드'),
+                strokeDash=alt.StrokeDash('Brand', scale=alt.Scale(domain=list(brands), range=dash_styles), legend=None),
                 tooltip=['Date', 'Brand', 'Mentions']
             ).properties(
                 height=400
             ).interactive()
             
             st.altair_chart(chart, use_container_width=True)
+            
 
 
