@@ -8,17 +8,28 @@ importlib.reload(personas_manager)
 st.set_page_config(page_title="사용자 페르소나 설정", page_icon="🎭")
 
 # Hide native navigation
+# Hide native navigation & Set Sidebar Width
 st.markdown("""
 <style>
+/* Desktop Sidebar Width */
+@media (min-width: 768px) {
+    [data-testid="stSidebar"] {
+        min-width: 500px;
+        max-width: 800px;
+    }
+}
 [data-testid="stSidebarNav"] {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
 # Sidebar navigation
 with st.sidebar:
-    st.markdown("#### ⚙️ 설정 (Settings)")
     if st.button("홈 (Main)", use_container_width=True):
         st.switch_page("app.py")
+        
+    st.divider()
+    
+    st.markdown("#### ⚙️ 설정 (Settings)")
         
     if st.button("질문자 페르소나 설정", use_container_width=True, type="primary"):
         st.switch_page("pages/02_Personas.py")
