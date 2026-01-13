@@ -78,6 +78,11 @@ with st.sidebar:
         st.switch_page("pages/02_Personas.py")
 
     if st.button("질문 설정", use_container_width=True):
+        # If viewing history, sync those questions to active settings so user can edit them
+        if st.session_state.get("viewing_history", False) and st.session_state.get("briefing_results"):
+            history_questions = [item['question'] for item in st.session_state.briefing_results]
+            questions_manager.set_questions(history_questions)
+            
         st.switch_page("pages/04_Question_Settings.py")
 
     if st.button("이메일 수신인 설정", use_container_width=True):
