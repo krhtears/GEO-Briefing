@@ -59,6 +59,9 @@ with st.sidebar:
 
     if st.button("경쟁사 키워드 관리", use_container_width=True):
         st.switch_page("pages/03_Competitor_Settings.py")
+
+    if st.button("질문 설정 (Questions)", use_container_width=True):
+        st.switch_page("pages/04_Question_Settings.py")
         
     st.divider()
 
@@ -140,40 +143,35 @@ if st.session_state.get("viewing_history", False):
         questions = []
 
 else:
-    # Live Mode - Edit Questions
-    st.sidebar.header("질문 편집하기")
+    # Live Mode - View Settings
     
-    # Add new question
-    with st.sidebar.form(key="question_form", clear_on_submit=True):
-        new_question = st.text_area("새로운 질문을 입력해주세요.", height=150)
-        submit_question = st.form_submit_button("질문 추가하기")
+    # 1. Questions (Latest Active)
+    st.sidebar.markdown("### 📋 등록된 질문")
+    current_questions = questions_manager.load_questions()
+    if current_questions:
+        for i, q in enumerate(current_questions):
+            st.sidebar.markdown(f"<span style='color: #666666;'>**{i+1}.** {q}</span>", unsafe_allow_html=True)
+    else:
+        st.sidebar.info("등록된 질문이 없습니다.\n'질문 설정' 메뉴에서 추가해주세요.")
+    
+    st.sidebar.divider()
 
-        if submit_question:
-            if new_question:
-                if questions_manager.add_question(new_question):
-                    st.sidebar.success("질문 추가 완료!")
-                    st.rerun()
-                else:
-                    st.sidebar.warning("질문이 이미 존재합니다.")
-            else:
-                st.sidebar.warning("질문을 입력해주세요.")
-
-    # List and Delete questions
-    # List and Delete questions
-    st.sidebar.markdown("### <span style='color: #666666;'>등록된 질문</span>", unsafe_allow_html=True)
-    questions = questions_manager.load_questions()
-
-    for i, q in enumerate(questions):
-        col1, col2 = st.sidebar.columns([0.85, 0.15])
-        col1.markdown(f"<span style='color: #666666;'>**{i+1}.** {q}</span>", unsafe_allow_html=True)
-        if col2.button("🗑️", key=f"del_q_{i}"):
-            questions_manager.delete_question(i)
-            st.rerun()
-
-st.sidebar.divider()
-
-# --- Persona Status ---
-st.sidebar.header("질문자 페르소나")
+    # 2. Persona Status
+    st.sidebar.markdown("### 🎭 질문자 페르소나")
+    
+    # Load active personas
+    all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
+    active_personas_list = [p for p in all_personas if p.get('active', False)]
+    
+    if active_personas_list:
+        st.sidebar.success(f"총 {len(active_personas_list)}개의 페르소나가 적용됩니다.")
+        for p in active_personas_list:
+            st.sidebar.text(f"✅ {p['name']}")
+        
+        selected_persona_prompts = [p['prompt'] for p in active_personas_list]
+    else:
+        st.sidebar.info("적용된 페르소나가 없습니다.\n'질문자 페르소나 설정' 메뉴에서 선택해주세요.")
+        selected_persona_prompts = []
 
 # Load active personas
 all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
