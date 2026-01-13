@@ -337,51 +337,71 @@ if st.session_state.briefing_results:
 
     # Display Stats Table (custom HTML to match look)
     st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
+    st.caption("동일 질문 내 동일 키워드는 한번만 카운트 됩니다.")
+    # --- Build HTML Table ---
     
-    # Create rows for HTML table
-    header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
-    
-    # Total Counts (Current)
-    count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{data['count']}</td>" for data in stats.values()])
-    
-    # Previous Counts (Comparison)
-    prev_count_html = ""
-    if previous_stats:
-        for brand in stats.keys():
-            prev_val = previous_stats.get(brand, {}).get('count', 0)
-            prev_count_html += f"<td style='border: 1px solid black; padding: 5px; text-align: center; color: #888;'>({prev_val})</td>"
-    else:
-        prev_count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center; color: #888;'>-</td>" for _ in stats.keys()])
+    # 1. Header Rows
+    # Row 1: Category + Brand Names (Colspan 2)
+    header_row_1 = f"<th rowspan='2' style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center; width: 100px; vertical-align: middle;'>구분</th>"
+    for brand in stats.keys():
+        header_row_1 += f"<th colspan='2' style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>"
 
-    # Detail Breakdown
-    detail_html = ""
-    for data in stats.values():
-        details = data['details']
-        # Filter non-zero
-        active_kws = [f"{k}: {v}" for k, v in details.items() if v > 0]
+    # Row 2: Sub-headers (Current / Previous)
+    header_row_2 = ""
+    for _ in stats.keys():
+        header_row_2 += "<th style='background-color: #F2F2F2; border: 1px solid black; padding: 5px; text-align: center; font-size: 0.9em;'>이번 회차</th>"
+        header_row_2 += "<th style='background-color: #F2F2F2; border: 1px solid black; padding: 5px; text-align: center; font-size: 0.9em; color: #666;'>지난 회차</th>"
+
+    # 2. Data Rows
+    # Helper to format details
+    def format_details(details_dict):
+        active_kws = [f"{k}: {v}" for k, v in details_dict.items() if v > 0]
         if active_kws:
-            cell_content = "<br>".join(active_kws)
-        else:
-            cell_content = "-"
-        detail_html += f"<td style='border: 1px solid black; padding: 5px; text-align: center; font-size: 0.8em; color: #555;'>{cell_content}</td>"
+            return "<br>".join(active_kws)
+        return "-"
 
+    count_cells = ""
+    detail_cells = ""
+
+    for brand in stats.keys():
+        # Current Data
+        curr_count = stats[brand]['count']
+        curr_details = format_details(stats[brand]['details'])
+        
+        # Previous Data
+        prev_count = 0
+        prev_details = "-"
+        if previous_stats and brand in previous_stats:
+            prev_count = previous_stats[brand]['count']
+            prev_details = format_details(previous_stats[brand]['details'])
+        elif not previous_stats:
+             prev_count = "-" # No history available
+             prev_details = "-"
+
+        # Count Cell
+        count_cells += f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{curr_count}</td>"
+        count_cells += f"<td style='border: 1px solid black; padding: 5px; text-align: center; color: #666;'>{prev_count}</td>"
+
+        # Detail Cell
+        detail_cells += f"<td style='border: 1px solid black; padding: 5px; text-align: center; font-size: 0.8em; color: #555;'>{curr_details}</td>"
+        detail_cells += f"<td style='border: 1px solid black; padding: 5px; text-align: center; font-size: 0.8em; color: #888;'>{prev_details}</td>"
+
+    # Assemble Table
     st.markdown(f"""
     <table style='width: 100%; border-collapse: collapse; border: 1px solid black;'>
         <tr>
-            <th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center; width: 100px;'>구분</th>
-            {header_html}
+            {header_row_1}
+        </tr>
+        <tr>
+            {header_row_2}
         </tr>
         <tr>
             <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>언급횟수</td>
-            {count_html}
-        </tr>
-        <tr>
-            <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold; color: #666;'>이전회차</td>
-            {prev_count_html}
+            {count_cells}
         </tr>
         <tr>
             <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>키워드 상세</td>
-            {detail_html}
+            {detail_cells}
         </tr>
     </table>
     <br>
