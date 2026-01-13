@@ -48,20 +48,21 @@ st.markdown("### 유초중사업본부 GEO Analytics")
 # Sidebar Logic
 with st.sidebar:
     # Custom Navigation
+    st.markdown("#### ⚙️ 설정 (Settings)")
     if st.button("홈 (Main)", use_container_width=True, type="primary"):
         st.switch_page("app.py")
-        
-    if st.button("이메일 수신인 설정", use_container_width=True):
-        st.switch_page("pages/01_Email_Recipients.py")
         
     if st.button("질문자 페르소나 설정", use_container_width=True):
         st.switch_page("pages/02_Personas.py")
 
+    if st.button("질문 설정", use_container_width=True):
+        st.switch_page("pages/04_Question_Settings.py")
+
+    if st.button("이메일 수신인 설정", use_container_width=True):
+        st.switch_page("pages/01_Email_Recipients.py")
+
     if st.button("경쟁사 키워드 관리", use_container_width=True):
         st.switch_page("pages/03_Competitor_Settings.py")
-
-    if st.button("질문 설정 (Questions)", use_container_width=True):
-        st.switch_page("pages/04_Question_Settings.py")
         
     st.divider()
 
@@ -173,21 +174,7 @@ else:
         st.sidebar.info("적용된 페르소나가 없습니다.\n'질문자 페르소나 설정' 메뉴에서 선택해주세요.")
         selected_persona_prompts = []
 
-# Load active personas
-all_personas = personas_manager.load_personas() # [{'name':..., 'active':...}]
-active_personas_list = [p for p in all_personas if p.get('active', False)]
 
-if active_personas_list:
-    st.sidebar.success(f"총 {len(active_personas_list)}개의 질문자 페르소나가 적용됩니다.")
-    for p in active_personas_list:
-        st.sidebar.text(f"✅ {p['name']}")
-    
-    # Get prompts for API
-    selected_persona_prompts = [p['prompt'] for p in active_personas_list]
-
-else:
-    st.sidebar.info("적용된 페르소나가 없습니다.\n'질문자 페르소나 설정' 메뉴에서 선택해주세요.")
-    selected_persona_prompts = []
 
 
 # Main Area
