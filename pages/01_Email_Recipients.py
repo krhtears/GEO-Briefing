@@ -16,20 +16,21 @@ st.markdown("""
 
 # Sidebar navigation
 with st.sidebar:
+    st.markdown("#### ⚙️ 설정 (Settings)")
     if st.button("홈 (Main)", use_container_width=True):
         st.switch_page("app.py")
-        
-    if st.button("이메일 수신인 설정", use_container_width=True, type="primary"):
-        st.switch_page("pages/01_Email_Recipients.py")
         
     if st.button("질문자 페르소나 설정", use_container_width=True):
         st.switch_page("pages/02_Personas.py")
 
+    if st.button("질문 설정", use_container_width=True):
+        st.switch_page("pages/04_Question_Settings.py")
+        
+    if st.button("이메일 수신인 설정", use_container_width=True, type="primary"):
+        st.switch_page("pages/01_Email_Recipients.py")
+
     if st.button("경쟁사 키워드 관리", use_container_width=True):
         st.switch_page("pages/03_Competitor_Settings.py")
-
-    if st.button("질문 설정 (Questions)", use_container_width=True):
-        st.switch_page("pages/04_Question_Settings.py")
         
     st.divider()
 
