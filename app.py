@@ -62,6 +62,20 @@ with st.sidebar:
         
     st.divider()
 
+    # --- Action Buttons ---
+    st.markdown("#### 🚀 실행 (Actions)")
+    col_run, col_email = st.columns(2)
+    with col_run:
+        run_clicked = st.button("Briefing 시작하기", type="primary", use_container_width=True)
+    with col_email:
+        email_clicked = st.button("결과 이메일로 보내기", use_container_width=True)
+    
+    if run_clicked:
+        st.session_state.viewing_history = False # Reset to Live Mode on Run
+        st.session_state.selected_hist_index = None # Reset selection
+        
+    st.divider()
+
 if st.session_state.get("viewing_history", False):
     st.sidebar.header("📜 지난 브리핑 질문")
     st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
@@ -186,19 +200,26 @@ st.markdown("##### Recent Briefings (최근 14개)")
 history_items = history_manager.load_history()
 
 # Create a container for history buttons to layout horizontally or wrapped
+# Create a container for history buttons to layout horizontally or wrapped
 if history_items:
-    cols = st.columns(len(history_items))
-    for i, item in enumerate(history_items):
-        # Determine button style
-        btn_type = "primary" if st.session_state.get("selected_hist_index") == i else "secondary"
+    # Chunk items into groups of 7
+    chunk_size = 7
+    for i in range(0, len(history_items), chunk_size):
+        chunk = history_items[i:i + chunk_size]
+        cols = st.columns(chunk_size)
         
-        # Button label: Timestamp
-        if cols[i].button(f"{item['timestamp']}\n(View)", key=f"hist_{i}", type=btn_type):
-             st.session_state.briefing_results = item['data']
-             st.session_state.show_confirm_dialog = False # Don't show confirm for history view
-             st.session_state.viewing_history = True # Enable History View Mode
-             st.session_state.selected_hist_index = i # Track selection
-             st.rerun()
+        for j, item in enumerate(chunk):
+            real_index = i + j
+            # Determine button style
+            btn_type = "primary" if st.session_state.get("selected_hist_index") == real_index else "secondary"
+            
+            # Button label: Timestamp
+            if cols[j].button(f"{item['timestamp']}\n(View)", key=f"hist_{real_index}", type=btn_type):
+                 st.session_state.briefing_results = item['data']
+                 st.session_state.show_confirm_dialog = False # Don't show confirm for history view
+                 st.session_state.viewing_history = True # Enable History View Mode
+                 st.session_state.selected_hist_index = real_index # Track selection
+                 st.rerun()
     st.divider()
 
 # Initialize session state for results if not exists
@@ -214,16 +235,8 @@ if "briefing_results" not in st.session_state:
             st.session_state.viewing_history = True
             st.session_state.selected_hist_index = 0
 
-col_btn_run, col_btn_email = st.columns([0.2, 0.8])
+# Logic for button clicks provided in Sidebar
 
-with col_btn_run:
-    run_clicked = st.button("Briefing 시작하기", type="primary")
-    if run_clicked:
-        st.session_state.viewing_history = False # Reset to Live Mode on Run
-        st.session_state.selected_hist_index = None # Reset selection
-
-with col_btn_email:
-    email_clicked = st.button("결과 이메일로 보내기")
 
 if run_clicked:
     if not questions:
