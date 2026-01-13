@@ -1,18 +1,15 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage
 import api_keys
-import os
 from datetime import datetime
 import stats_manager # Import for highlighting logic
 
-def send_briefing_email(recipients, results_data, stats=None, chart_image_path=None):
+def send_briefing_email(recipients, results_data, stats=None):
     """
     Sends an HTML email with the briefing results.
     results_data: List of tuples/dicts [(question, gemini_answer, gpt_answer), ...]
     stats: Dict {Brand: count}
-    chart_image_path: Absolute path to the trend chart image file (optional)
     """
     if not recipients:
         return "No recipients specified."
@@ -73,16 +70,6 @@ def send_briefing_email(recipients, results_data, stats=None, chart_image_path=N
         </div>
         """
         
-    # Chart HTML
-    chart_html = ""
-    if chart_image_path and os.path.exists(chart_image_path):
-        chart_html = """
-        <div style="margin-bottom: 30px;">
-            <h3>📈 브랜드 언급 추이</h3>
-            <img src="cid:trend_chart" style="width: 100%; max-width: 800px; border: 1px solid #ddd;">
-        </div>
-        """
-
     # Build HTML Content
     html_content = f"""
     <html>
@@ -103,7 +90,6 @@ def send_briefing_email(recipients, results_data, stats=None, chart_image_path=N
     <body>
         <h2>Daily AI Briefing Reports</h2>
         {stats_html}
-        {chart_html}
     """
     
     import re
@@ -177,19 +163,6 @@ def send_briefing_email(recipients, results_data, stats=None, chart_image_path=N
     
     # Attach HTML
     msg.attach(MIMEText(html_content, 'html'))
-    
-    # Attach Image
-    if chart_image_path and os.path.exists(chart_image_path):
-        try:
-            with open(chart_image_path, 'rb') as f:
-                img_data = f.read()
-            image = MIMEImage(img_data)
-            image.add_header('Content-ID', '<trend_chart>')
-            image.add_header('Content-Disposition', 'inline', filename='trend_chart.png')
-            msg.attach(image)
-        except Exception as e:
-            # If attachment fails, we just continue sending text/html
-            print(f"Failed to attach image: {e}")
     
     try:
         # Gmail SMTP Server
