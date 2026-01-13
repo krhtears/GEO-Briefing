@@ -3,6 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import api_keys
 from datetime import datetime
+import stats_manager # Import for highlighting logic
 
 def send_briefing_email(recipients, results_data, stats=None):
     """
@@ -34,7 +35,20 @@ def send_briefing_email(recipients, results_data, stats=None):
     stats_html = ""
     if stats:
         header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
-        count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{count}</td>" for count in stats.values()])
+        # Total Counts
+        count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{data['count']}</td>" for data in stats.values()])
+        
+        # Detail Breakdown
+        detail_html = ""
+        for data in stats.values():
+            details = data['details']
+            active_kws = [f"{k}: {v}" for k, v in details.items() if v > 0]
+            if active_kws:
+                cell_content = "<br>".join(active_kws)
+            else:
+                cell_content = "-"
+            detail_html += f"<td style='border: 1px solid black; padding: 5px; text-align: center; font-size: 0.8em; color: #555;'>{cell_content}</td>"
+
         stats_html = f"""
         <div style="margin-bottom: 30px;">
             <h3>📊 키워드 언급 횟수</h3>
@@ -46,6 +60,10 @@ def send_briefing_email(recipients, results_data, stats=None):
                 <tr>
                     <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>언급횟수</td>
                     {count_html}
+                </tr>
+                <tr>
+                    <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>키워드 상세</td>
+                    {detail_html}
                 </tr>
             </table>
         </div>
@@ -86,6 +104,19 @@ def send_briefing_email(recipients, results_data, stats=None):
         # 3. Handle newlines
         text = text.replace('\n', '<br>')
         
+        text = text.replace('\n', '<br>')
+        
+        return text
+    
+    # Highlighting Logic
+    all_competitors = stats_manager.load_competitors()
+    
+    def highlight_text(text, competitors):
+        for comp in competitors:
+            for kw in comp['keywords']:
+                if kw in text:
+                    # Inline style for email compatibility
+                    text = text.replace(kw, f"<span style='background-color: #FFF2CC; padding: 0 2px;'>{kw}</span>")
         return text
     
     for item in results_data:
@@ -94,6 +125,12 @@ def send_briefing_email(recipients, results_data, stats=None):
         # Apply formatting
         gemini = format_text(item['gemini'])
         gpt = format_text(item['gpt'])
+        
+        # Apply Highlighting (after formatting to preserve HTML tags if safe, actually before might be better?)
+        # Let's do after, but ensuring we don't break the HTML we just added. 
+        # Actually our highlight adds span tags, format_text adds b/br tags. They shouldn't conflict unless keywords overlap with tags which is unlikely.
+        gemini = highlight_text(gemini, all_competitors)
+        gpt = highlight_text(gpt, all_competitors)
         
         html_content += f"""
         <div class="container">

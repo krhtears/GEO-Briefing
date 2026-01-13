@@ -212,7 +212,7 @@ else:
     active_personas_list = [p for p in all_personas if p.get('active', False)]
     
     if active_personas_list:
-        st.sidebar.success(f"총 {len(active_personas_list)}개의 페르소나가 적용됩니다.")
+        st.sidebar.success(f"총 {len(active_personas_list)}개의 페르소나가 적용됩니다. (최대 5개)")
         for p in active_personas_list:
             st.sidebar.text(f"✅ {p['name']}")
         
@@ -341,9 +341,24 @@ if st.session_state.briefing_results:
     st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
     
     # Create rows for HTML table
+    # Create rows for HTML table
     header_html = "".join([f"<th style='background-color: #E2EFDA; border: 1px solid black; padding: 5px; text-align: center;'>{brand}</th>" for brand in stats.keys()])
-    count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{count}</td>" for count in stats.values()])
     
+    # Total Counts
+    count_html = "".join([f"<td style='border: 1px solid black; padding: 5px; text-align: center;'>{data['count']}</td>" for data in stats.values()])
+    
+    # Detail Breakdown
+    detail_html = ""
+    for data in stats.values():
+        details = data['details']
+        # Filter non-zero
+        active_kws = [f"{k}: {v}" for k, v in details.items() if v > 0]
+        if active_kws:
+            cell_content = "<br>".join(active_kws)
+        else:
+            cell_content = "-"
+        detail_html += f"<td style='border: 1px solid black; padding: 5px; text-align: center; font-size: 0.8em; color: #555;'>{cell_content}</td>"
+
     st.markdown(f"""
     <table style='width: 100%; border-collapse: collapse; border: 1px solid black;'>
         <tr>
@@ -354,19 +369,42 @@ if st.session_state.briefing_results:
             <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>언급횟수</td>
             {count_html}
         </tr>
+        <tr>
+            <td style='border: 1px solid black; padding: 5px; text-align: center; font-weight: bold;'>키워드 상세</td>
+            {detail_html}
+        </tr>
     </table>
     <br>
     """, unsafe_allow_html=True)
 
+    # Function to highlight keywords
+    def highlight_text(text, competitors):
+        for comp in competitors:
+            for kw in comp['keywords']:
+                # Simple replacement with mark tag
+                # Note: This might overlap if one keyword is a substring of another.
+                # For basic usage, it's acceptable.
+                if kw in text:
+                    text = text.replace(kw, f"<mark style='background-color: #FFF2CC; padding: 0 2px; border-radius: 2px;'>{kw}</mark>")
+        return text
+
+    # Load competitors once for highlighting
+    all_competitors = stats_manager.load_competitors()
+
     for item in st.session_state.briefing_results:
         st.markdown(f"### ❓ {item['question']}")
+        
+        # Apply Highlighting
+        gemini_text = highlight_text(item['gemini'], all_competitors)
+        gpt_text = highlight_text(item['gpt'], all_competitors)
+        
         col_gemini, col_gpt = st.columns(2)
         with col_gemini:
              st.markdown("#### ✨ Gemini")
-             st.markdown(item['gemini'])
+             st.markdown(gemini_text, unsafe_allow_html=True)
         with col_gpt:
              st.markdown("#### 🤖 GPT")
-             st.markdown(item['gpt'])
+             st.markdown(gpt_text, unsafe_allow_html=True)
         st.divider()
     
     if not st.session_state.get("show_confirm_dialog", False):
@@ -414,7 +452,14 @@ if history_items:
             # Note: This relies on competitors.json being current. 
             # If historical data had brands that are now deleted, they won't be counted here.
             # This is acceptable for "Current View" of trends.
-            stats = stats_manager.calculate_stats(item['data'])
+            # Re-calculate stats for this history item
+            # Note: This relies on competitors.json being current. 
+            # If historical data had brands that are now deleted, they won't be counted here.
+            # This is acceptable for "Current View" of trends.
+            raw_stats = stats_manager.calculate_stats(item['data'])
+            
+            # Extract just the counts for the chart
+            stats = {k: v['count'] for k, v in raw_stats.items()}
             
             # Shorten date for display (MM-DD)
             date_str = item['timestamp'][5:10] 
