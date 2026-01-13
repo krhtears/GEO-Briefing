@@ -66,18 +66,19 @@ def ask_gpt(question, persona_prompts=None):
         return "⚠️ OpenAI client not initialized."
 
     # Construct System Prompt
-    base_system = "You are a helpful assistant providing daily briefings."
+    base_system = "You are a helpful assistant providing detailed and comprehensive daily briefings. Always provide rich, in-depth explanations rather than short summaries."
     if persona_prompts:
         if isinstance(persona_prompts, list):
             additional_prompts = "\n\n".join(persona_prompts)
             # Change wording to reflect User Persona
-            base_system += f"\n\nThe user asking the question matches the following persona/profile:\n{additional_prompts}\n\nPlease tailor your answer to be relevant and helpful to this user's context."
+            base_system += f"\n\nThe user asking the question matches the following persona/profile:\n{additional_prompts}\n\nPlease tailor your answer to be relevant and helpful to this user's context. Maintain a high level of detail."
         elif isinstance(persona_prompts, str):
-             base_system += f"\n\nThe user asking the question matches the following persona/profile:\n{persona_prompts}\n\nPlease tailor your answer to be relevant and helpful to this user's context."
+             base_system += f"\n\nThe user asking the question matches the following persona/profile:\n{persona_prompts}\n\nPlease tailor your answer to be relevant and helpful to this user's context. Maintain a high level of detail."
 
     try:
         response = openai_client.chat.completions.create(
             model="gpt-4o",
+            max_tokens=3000,
             messages=[
                 {"role": "system", "content": base_system},
                 {"role": "user", "content": question}
