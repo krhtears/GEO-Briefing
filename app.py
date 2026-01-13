@@ -404,7 +404,12 @@ if email_clicked or st.session_state.get("trigger_email_send", False):
             # Re-calculate stats for email to be safe (or pass from session state)
             stats = stats_manager.calculate_stats(st.session_state.briefing_results)
             
-            email_status = email_sender.send_briefing_email(recipients, st.session_state.briefing_results, stats)
+            # Generate Trend Chart Image
+            # Load full history to generate the trend
+            history_items = history_manager.load_history()
+            chart_image_path = stats_manager.generate_trend_chart_image(history_items)
+            
+            email_status = email_sender.send_briefing_email(recipients, st.session_state.briefing_results, stats, chart_image_path=chart_image_path)
             
             if email_status is True:
                 st.success("이 메일이 발송되었습니다")

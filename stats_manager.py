@@ -59,3 +59,69 @@ def calculate_stats(results_data):
                     stats[brand_name]["details"][kw] += 1
                 
     return stats
+
+def generate_trend_chart_image(history_items):
+    """
+    Generates a static PNG image of the trend chart using Matplotlib.
+    Returns the absolute path to the generated image file.
+    """
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
+        import pandas as pd
+        import tempfile
+        
+        # 1. Prepare Data
+        trend_data = []
+        for item in reversed(history_items):
+            try:
+                raw_stats = calculate_stats(item['data'])
+                stats = {k: v['count'] for k, v in raw_stats.items()}
+                date_str = item['timestamp'][5:10] # MM-DD
+                stats['Date'] = date_str
+                trend_data.append(stats)
+            except Exception:
+                continue
+                
+        if not trend_data:
+            return None
+            
+        df = pd.DataFrame(trend_data)
+        if 'Date' not in df.columns:
+            return None
+            
+        # 2. Plotting
+        plt.figure(figsize=(10, 6))
+        
+        # Try to use a Korean-supporting font if available, else standard
+        # Windows usually has Malgun Gothic
+        font_name = "Malgun Gothic"
+        plt.rc('font', family=font_name)
+        plt.rc('axes', unicode_minus=False) # Fix minus sign issue
+        
+        # Plot each brand
+        brands = [c for c in df.columns if c != 'Date']
+        styles = ['-', '--', '-.', ':']
+        
+        for i, brand in enumerate(brands):
+            style = styles[i % len(styles)]
+            plt.plot(df['Date'], df[brand], label=brand, linestyle=style, marker='o')
+            
+        plt.title('최근 14회 브리핑 브랜드 언급량 추이')
+        plt.xlabel('날짜 (MM-DD)')
+        plt.ylabel('언급 횟수')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        
+        # 3. Save to Temp File
+        temp_dir = tempfile.gettempdir()
+        file_path = os.path.join(temp_dir, "briefing_trend_chart.png")
+        plt.savefig(file_path, dpi=100)
+        plt.close()
+        
+        return file_path
+        
+    except Exception as e:
+        print(f"Error generating chart: {e}")
+        return None
