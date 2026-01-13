@@ -43,7 +43,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("유초중사업본부 GEO Analytics")
+st.markdown("### 유초중사업본부 GEO Analytics")
 
 # Sidebar Logic
 with st.sidebar:
@@ -131,7 +131,7 @@ else:
     
     # Add new question
     with st.sidebar.form(key="question_form", clear_on_submit=True):
-        new_question = st.text_input("새로운 질문을 입력해주세요.")
+        new_question = st.text_area("새로운 질문을 입력해주세요.", height=150)
         submit_question = st.form_submit_button("질문 추가하기")
 
         if submit_question:
@@ -179,10 +179,10 @@ else:
 
 
 # Main Area
-st.markdown("##### (1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
+st.caption("(1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
 
 # --- History Section ---
-st.markdown("### Recent Briefings (최근 14개)")
+st.markdown("##### Recent Briefings (최근 14개)")
 history_items = history_manager.load_history()
 
 # Create a container for history buttons to layout horizontally or wrapped
