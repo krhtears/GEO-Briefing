@@ -114,7 +114,7 @@ with st.sidebar:
         
     st.divider()
 
-@st.experimental_dialog("알림")
+@st.dialog("알림")
 def email_success_dialog():
     st.write("이 메일이 발송되었습니다")
     if st.button("확인", type="primary"):
