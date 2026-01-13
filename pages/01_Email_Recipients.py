@@ -25,6 +25,8 @@ st.markdown("""
 # Sidebar navigation
 with st.sidebar:
     if st.button("홈 (Main)", use_container_width=True):
+        st.session_state.viewing_history = False
+        st.session_state.selected_hist_index = None
         st.switch_page("app.py")
         
     st.divider()
