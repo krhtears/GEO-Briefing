@@ -270,6 +270,10 @@ if run_clicked:
             # Save to history
             history_manager.save_to_history(results_data, active_personas_to_save)
             
+            # Switch to history view for the newly created item
+            st.session_state.viewing_history = True
+            st.session_state.selected_hist_index = 0
+            
             st.session_state.show_confirm_dialog = True  # Trigger confirmation
             st.rerun() 
 
