@@ -25,8 +25,18 @@ def save_to_history(results_data, active_personas=None):
     """
     history = load_history()
     
+    # Calculate KST (UTC+9)
+    # If environment is local and already KST, this might double add if we aren't careful.
+    # But usually machines are UTC in cloud, or Local in desktop.
+    # To be safe and explicit:
+    from datetime import timedelta, timezone
+    
+    # Create KST timezone
+    kst = timezone(timedelta(hours=9))
+    now_kst = datetime.now(kst)
+    
     new_entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "timestamp": now_kst.strftime("%Y-%m-%d %H:%M:%S"),
         "data": results_data,
         "personas": active_personas or []
     }
