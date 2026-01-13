@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 HISTORY_FILE = "history.json"
-MAX_HISTORY = 7
+MAX_HISTORY = 14
 
 def load_history():
     """Loads the history list from the JSON file."""

@@ -182,7 +182,7 @@ else:
 st.markdown("##### (1) 질문, (2) 질문자 페르소나, (3) 메일 수신인을 확인하고 'briefing 시작하기' 버튼을 눌러주세요.")
 
 # --- History Section ---
-st.markdown("### Recent Briefings (최근 7개)")
+st.markdown("### Recent Briefings (최근 14개)")
 history_items = history_manager.load_history()
 
 # Create a container for history buttons to layout horizontally or wrapped
@@ -204,6 +204,15 @@ if history_items:
 # Initialize session state for results if not exists
 if "briefing_results" not in st.session_state:
     st.session_state.briefing_results = []
+    
+    # Auto-load latest history on first session init
+    if "has_initialized" not in st.session_state:
+        st.session_state.has_initialized = True
+        latest_history = history_manager.load_history()
+        if latest_history:
+            st.session_state.briefing_results = latest_history[0]['data']
+            st.session_state.viewing_history = True
+            st.session_state.selected_hist_index = 0
 
 col_btn_run, col_btn_email = st.columns([0.2, 0.8])
 
@@ -378,10 +387,39 @@ if history_items:
             
     if trend_data:
         import pandas as pd
+        import altair as alt
+
+        # Add requested vertical spacing
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("###### 📅 최근 14회 브리핑 브랜드 언급량 추이")
+        
         df_trend = pd.DataFrame(trend_data)
         if 'Date' in df_trend.columns:
-            df_trend = df_trend.set_index('Date')
-            st.markdown("###### 📅 최근 7회 브리핑 브랜드 언급량 추이")
-            st.line_chart(df_trend)
+            # Convert to long format for Altair
+            df_long = df_trend.melt('Date', var_name='Brand', value_name='Mentions')
+            
+            # Get unique brands to assign alternating styles
+            brands = df_long['Brand'].unique()
+            
+            # Create a domain/range for stroke dash (Solid vs Dashed)
+            dash_styles = []
+            for i, brand in enumerate(brands):
+                if i % 2 == 0:
+                    dash_styles.append([1, 0]) # Solid
+                else:
+                    dash_styles.append([5, 5]) # Dashed
+            
+            # Create Chart
+            chart = alt.Chart(df_long).mark_line(point=True).encode(
+                x=alt.X('Date', title='날짜'),
+                y=alt.Y('Mentions', title='언급 횟수'),
+                color=alt.Color('Brand', title='브랜드'),
+                strokeDash=alt.StrokeDash('Brand', scale=alt.Scale(domain=list(brands), range=dash_styles), title='브랜드'),
+                tooltip=['Date', 'Brand', 'Mentions']
+            ).properties(
+                height=400
+            ).interactive()
+            
+            st.altair_chart(chart, use_container_width=True)
 
 
