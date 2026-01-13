@@ -1,5 +1,7 @@
 import streamlit as st
 import stats_manager
+import importlib
+importlib.reload(stats_manager)
 
 # --- Clean Navigation ---
 # --- Clean Navigation & Sidebar Width ---
