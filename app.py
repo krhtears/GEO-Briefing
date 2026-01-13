@@ -18,6 +18,19 @@ importlib.reload(personas_manager)
 # Set page config
 st.set_page_config(page_title="유초중사업본부 GEO Analytics", page_icon="📊", layout="wide")
 
+# Initialize session state for results if not exists
+if "briefing_results" not in st.session_state:
+    st.session_state.briefing_results = []
+    
+    # Auto-load latest history on first session init
+    if "has_initialized" not in st.session_state:
+        st.session_state.has_initialized = True
+        latest_history = history_manager.load_history()
+        if latest_history:
+            st.session_state.briefing_results = latest_history[0]['data']
+            st.session_state.viewing_history = True
+            st.session_state.selected_hist_index = 0
+
 st.markdown(
     """
     <style>
@@ -237,18 +250,7 @@ if history_items:
                  st.rerun()
     st.divider()
 
-# Initialize session state for results if not exists
-if "briefing_results" not in st.session_state:
-    st.session_state.briefing_results = []
-    
-    # Auto-load latest history on first session init
-    if "has_initialized" not in st.session_state:
-        st.session_state.has_initialized = True
-        latest_history = history_manager.load_history()
-        if latest_history:
-            st.session_state.briefing_results = latest_history[0]['data']
-            st.session_state.viewing_history = True
-            st.session_state.selected_hist_index = 0
+
 
 # Logic for button clicks provided in Sidebar
 
