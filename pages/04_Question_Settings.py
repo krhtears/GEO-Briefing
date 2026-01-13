@@ -68,6 +68,15 @@ with col_reset:
             st.rerun()
         else:
             st.warning("브리핑 기록이 없습니다.")
+            
+with col_space:
+    # Right-aligned Start Button
+    # Use columns to push it to the right
+    sub_col_1, sub_col_2 = st.columns([0.4, 0.6])
+    with sub_col_2:
+        if st.button("🚀 이 질문으로 바로 Briefing 시작하기", type="primary", use_container_width=True):
+            st.session_state.auto_run_briefing = True
+            st.switch_page("app.py")
 
 # Add New Question Form
 with st.expander("➕ 새로운 질문 추가하기", expanded=False):
