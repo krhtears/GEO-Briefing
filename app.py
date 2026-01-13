@@ -48,12 +48,12 @@ st.markdown("### 유초중사업본부 GEO Analytics")
 # Sidebar Logic
 with st.sidebar:
     # Custom Navigation
-    st.markdown("#### ⚙️ 설정 (Settings)")
-
-    st.divider()
-    
     if st.button("홈 (Main)", use_container_width=True, type="primary"):
         st.switch_page("app.py")
+    
+    st.divider()
+
+    st.markdown("#### ⚙️ 설정 (Settings)")
         
     if st.button("질문자 페르소나 설정", use_container_width=True):
         st.switch_page("pages/02_Personas.py")
