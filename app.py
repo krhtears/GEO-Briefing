@@ -180,8 +180,10 @@ else:
     if current_questions:
         for i, q in enumerate(current_questions):
             st.sidebar.markdown(f"<span style='color: #666666;'>**{i+1}.** {q}</span>", unsafe_allow_html=True)
+        questions = current_questions
     else:
         st.sidebar.info("등록된 질문이 없습니다.\n'질문 설정' 메뉴에서 추가해주세요.")
+        questions = []
     
     st.sidebar.divider()
 
