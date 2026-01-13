@@ -66,7 +66,9 @@ st.markdown("### 유초중사업본부 GEO Analytics")
 with st.sidebar:
     # Custom Navigation
     if st.button("홈 (Main)", use_container_width=True, type="primary"):
-        st.switch_page("app.py")
+        st.session_state.viewing_history = False
+        st.session_state.selected_hist_index = None
+        st.rerun()
     
     st.divider()
 
@@ -102,51 +104,7 @@ with st.sidebar:
 
 if st.session_state.get("viewing_history", False):
     st.sidebar.header("📜 지난 브리핑 질문")
-    st.sidebar.info("뷰어 모드입니다. 편집하려면 아래 버튼을 눌러주세요.")
     
-    # CSS to make the "Back" button blink/pulse, and fix Primary button text
-    st.markdown("""
-    <style>
-    /* 1. Pulse Animation Keyframes */
-    @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(255, 128, 128, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(255, 128, 128, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 128, 128, 0); }
-    }
-    
-    /* 2. Target adjustments */
-    .stButton button[kind="primary"] {
-        color: white !important; 
-        font-weight: bold !important;
-    }
-    .stButton button[kind="primary"]:hover {
-        color: white !important;
-    }
-
-    /* Target the specific blinking container */
-    .blinking-container button {
-        animation: pulse-red 2s infinite;
-        border: 1px solid #FF8080 !important;
-        color: #FF8080 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Wrap the button locally to target it specifically
-    with st.sidebar.container():
-        st.markdown('<div class="blinking-container">', unsafe_allow_html=True)
-        if st.button("🔙 브리핑 입력 모드 돌아가기"):
-            # Restore latest questions if available
-            history_items = history_manager.load_history()
-            if history_items:
-                latest_questions = [item['question'] for item in history_items[0]['data']]
-                questions_manager.set_questions(latest_questions)
-                
-            st.session_state.viewing_history = False
-            st.session_state.selected_hist_index = None # Reset selection
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-        
     # Extract questions from the current result set
     if "briefing_results" in st.session_state and st.session_state.briefing_results:
         # Assuming current_questions matches the order in results
