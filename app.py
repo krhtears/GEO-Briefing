@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 import importlib
 import email_sender
 import questions_manager
@@ -422,15 +423,31 @@ if st.session_state.briefing_results:
     """, unsafe_allow_html=True)
 
     # Function to highlight keywords
+    # Function to highlight keywords
     def highlight_text(text, competitors):
+        # Flatten all keywords from all competitors
+        all_keywords = []
         for comp in competitors:
-            for kw in comp['keywords']:
-                # Simple replacement with mark tag
-                # Note: This might overlap if one keyword is a substring of another.
-                # For basic usage, it's acceptable.
-                if kw in text:
-                    text = text.replace(kw, f"<mark style='background-color: #FFF2CC; padding: 0 2px; border-radius: 2px;'>{kw}</mark>")
-        return text
+            all_keywords.extend(comp['keywords'])
+            
+        if not all_keywords:
+            return text
+            
+        # Sort keywords by length (longest first) to prevent substring overlap issues
+        # e.g. "Apple Pie" should be matched before "Apple"
+        all_keywords.sort(key=len, reverse=True)
+        
+        # Escape keywords for regex safety
+        escaped_keywords = [re.escape(k) for k in all_keywords]
+        
+        # Create a single compiled regex pattern
+        pattern = re.compile("|".join(escaped_keywords))
+        
+        # Replacement function
+        def replace_func(match):
+            return f"<mark style='background-color: #FFF2CC; padding: 0 2px; border-radius: 2px;'>{match.group(0)}</mark>"
+            
+        return pattern.sub(replace_func, text)
 
     # Load competitors once for highlighting
     all_competitors = stats_manager.load_competitors()
