@@ -59,3 +59,13 @@ def get_history_item(index):
     if 0 <= index < len(history):
         return history[index]
     return None
+
+def delete_history_item(index):
+    """Deletes a history item by index."""
+    history = load_history()
+    if 0 <= index < len(history):
+        history.pop(index)
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=4)
+        return True
+    return False

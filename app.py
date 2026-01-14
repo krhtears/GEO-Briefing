@@ -239,17 +239,36 @@ if history_items:
         cols = st.columns(chunk_size)
         
         for j, item in enumerate(chunk):
-            real_index = i + j
-            # Determine button style
-            btn_type = "primary" if st.session_state.get("selected_hist_index") == real_index else "secondary"
-            
-            # Button label: Timestamp
-            if cols[j].button(f"{item['timestamp']}\n(View)", key=f"hist_{real_index}", type=btn_type):
-                 st.session_state.briefing_results = item['data']
-                 st.session_state.show_confirm_dialog = False # Don't show confirm for history view
-                 st.session_state.viewing_history = True # Enable History View Mode
-                 st.session_state.selected_hist_index = real_index # Track selection
-                 st.rerun()
+            # Card-like container for each history item
+            with cols[j].container(border=True):
+                 # Top Row: Timestamp matching the button look (roughly)
+                 # We want "Delete" to be small and on the right.
+                 
+                 # Layout: [Timestamp (Clickable for View? No, let's keep explicit buttons)]
+                 # Actually, better:
+                 # Row 1: [Timestamp Label] [X Button]
+                 # Row 2: [View Button]
+                 
+                 c_label, c_del = st.columns([1, 0.3])
+                 with c_label:
+                     # Just display date decently
+                     # item['timestamp'] is "YYYY-MM-DD HH:MM:SS"
+                     # Let's show: "YYYY-MM-DD" small, "HH:MM" bold? Or just the string
+                     st.caption(item['timestamp'])
+                 
+                 with c_del:
+                     if st.button("❌", key=f"del_{real_index}", help="삭제", type="tertiary"):
+                         if history_manager.delete_history_item(real_index):
+                             st.rerun()
+
+                 # View Button
+                 btn_type = "primary" if st.session_state.get("selected_hist_index") == real_index else "secondary"
+                 if st.button("View Result", key=f"hist_{real_index}", type=btn_type, use_container_width=True):
+                      st.session_state.briefing_results = item['data']
+                      st.session_state.show_confirm_dialog = False 
+                      st.session_state.viewing_history = True 
+                      st.session_state.selected_hist_index = real_index 
+                      st.rerun()
     st.divider()
 
 
