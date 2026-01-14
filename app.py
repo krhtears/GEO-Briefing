@@ -1,5 +1,6 @@
 import streamlit as st
 import re
+import os
 import importlib
 import email_sender
 import questions_manager
@@ -69,6 +70,26 @@ with st.sidebar:
     if st.button("홈 (Main)", use_container_width=True, type="primary"):
         st.session_state.viewing_history = False
         st.session_state.selected_hist_index = None
+        
+        # Check if we should sync questions from history (if questions.json is stale)
+        # Stale means questions.json is older than history.json
+        if os.path.exists(history_manager.HISTORY_FILE) and os.path.exists(questions_manager.QUESTIONS_FILE):
+             try:
+                 t_hist = os.path.getmtime(history_manager.HISTORY_FILE)
+                 t_q = os.path.getmtime(questions_manager.QUESTIONS_FILE)
+                 
+                 # If history is newer, it implies user hasn't manually updated questions 
+                 # since the last run, so we should show what was run last.
+                 if t_hist > t_q:
+                     latest_hist = history_manager.load_history()
+                     if latest_hist:
+                         # Extract questions from the latest history item
+                         # Use 'question' key from data list
+                         latest_active_questions = [item['question'] for item in latest_hist[0]['data']]
+                         questions_manager.set_questions(latest_active_questions)
+             except Exception as e:
+                 print(f"Error syncing questions: {e}")
+
         st.rerun()
     
     st.divider()
