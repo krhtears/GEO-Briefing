@@ -364,11 +364,12 @@ if st.session_state.briefing_results:
     all_history = history_manager.load_history()
     
     # Determine which competitors config to use for Current Stats
-    current_competitors_config = None
-    if st.session_state.get("viewing_history", False):
-        hist_idx = st.session_state.get("selected_hist_index", 0)
-        if hist_idx is not None and 0 <= hist_idx < len(all_history):
-            current_competitors_config = all_history[hist_idx].get("competitors")
+    # MODIFIED: Always use current competitors to reflect settings changes (e.g. name fixes) immediately
+    current_competitors_config = None 
+    # if st.session_state.get("viewing_history", False):
+    #     hist_idx = st.session_state.get("selected_hist_index", 0)
+    #     if hist_idx is not None and 0 <= hist_idx < len(all_history):
+    #         current_competitors_config = all_history[hist_idx].get("competitors")
             
     stats = stats_manager.calculate_stats(st.session_state.briefing_results, competitors=current_competitors_config)
     
@@ -388,9 +389,9 @@ if st.session_state.briefing_results:
         prev_idx = current_idx + 1
         if prev_idx < len(all_history):
             prev_item = all_history[prev_idx]
-            # Use the competitors config that was saved with that history item
-            prev_config = prev_item.get("competitors")
-            previous_stats = stats_manager.calculate_stats(prev_item['data'], competitors=prev_config)
+            # Use current config for previous stats too, to ensure matching keys/names
+            # prev_config = prev_item.get("competitors")
+            previous_stats = stats_manager.calculate_stats(prev_item['data'], competitors=None)
 
     # Display Stats Table (custom HTML to match look)
     st.markdown("### 📊 브랜드, 관련 키워드 언급 횟수")
