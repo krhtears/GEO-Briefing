@@ -240,36 +240,37 @@ if history_items:
         
         for j, item in enumerate(chunk):
             real_index = i + j
-            # Card-like container for each history item
-            with cols[j].container(border=True):
-                 # Top Row: Timestamp matching the button look (roughly)
-                 # We want "Delete" to be small and on the right.
-                 
-                 # Layout: [Timestamp (Clickable for View? No, let's keep explicit buttons)]
-                 # Actually, better:
-                 # Row 1: [Timestamp Label] [X Button]
-                 # Row 2: [View Button]
-                 
-                 c_label, c_del = st.columns([1, 0.3])
-                 with c_label:
-                     # Just display date decently
-                     # item['timestamp'] is "YYYY-MM-DD HH:MM:SS"
-                     # Let's show: "YYYY-MM-DD" small, "HH:MM" bold? Or just the string
-                     st.caption(item['timestamp'])
-                 
-                 with c_del:
-                     if st.button("❌", key=f"del_{real_index}", help="삭제", type="tertiary"):
-                         if history_manager.delete_history_item(real_index):
-                             st.rerun()
-
-                 # View Button
-                 btn_type = "primary" if st.session_state.get("selected_hist_index") == real_index else "secondary"
-                 if st.button("View Result", key=f"hist_{real_index}", type=btn_type, use_container_width=True):
-                      st.session_state.briefing_results = item['data']
-                      st.session_state.show_confirm_dialog = False 
-                      st.session_state.viewing_history = True 
-                      st.session_state.selected_hist_index = real_index 
-                      st.rerun()
+            
+            # Use columns to position View (Timestamp) and Delete (X) side-by-side
+            # Since we are in a 1/7 width column, we split it further.
+            c_view, c_del = cols[j].columns([0.8, 0.2])
+            
+            with c_view:
+                # Main View Button (Displaying Timestamp)
+                # Shorten timestamp for better fit: "MM-DD\nHH:MM" or just "YY-MM-DD"
+                # The original was full timestamp. Let's keep it but maybe allow wrapping.
+                label = item['timestamp']
+                # Highlight if selected
+                btn_type = "primary" if st.session_state.get("selected_hist_index") == real_index else "secondary"
+                
+                if st.button(label, key=f"hist_{real_index}", type=btn_type, use_container_width=True):
+                     st.session_state.briefing_results = item['data']
+                     st.session_state.show_confirm_dialog = False 
+                     st.session_state.viewing_history = True 
+                     st.session_state.selected_hist_index = real_index 
+                     st.rerun()
+            
+            with c_del:
+                # Delete Button
+                if st.button("❌", key=f"del_{real_index}", help="삭제", type="tertiary", use_container_width=True):
+                     if history_manager.delete_history_item(real_index):
+                         # If we deleted the currently viewed item, reset view
+                         if st.session_state.get("selected_hist_index") == real_index:
+                             st.session_state.viewing_history = False
+                             st.session_state.selected_hist_index = None
+                             st.session_state.briefing_results = []
+                             
+                         st.rerun()
     st.divider()
 
 
