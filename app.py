@@ -239,6 +239,7 @@ if history_items:
         cols = st.columns(chunk_size)
         
         for j, item in enumerate(chunk):
+            real_index = i + j
             # Card-like container for each history item
             with cols[j].container(border=True):
                  # Top Row: Timestamp matching the button look (roughly)
